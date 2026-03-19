@@ -1,59 +1,130 @@
-# ElearnClient
+<div align="center">
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.2.
+# 🎓 ELearn Client
 
-## Development server
+**A modern e-learning platform template built with Angular, TailwindCSS, and TypeScript.**
 
-To start a local development server, run:
+![Angular](https://img.shields.io/badge/Angular-21.x-red?logo=angular)
+![TailwindCSS](https://img.shields.io/badge/TailwindCSS-4.x-06B6D4?logo=tailwindcss)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript)
+![License](https://img.shields.io/badge/License-MIT-green)
 
-```bash
-ng serve
+</div>
+
+---
+
+## ✨ Features
+
+- 🏠 **Home Page** — Hero, Courses, Mentors, Testimonials, and Contact sections
+- 📖 **Documentation Page** — Fully navigable in-app documentation with sticky sidebar
+- 🔐 **Auth Modals** — Sign In / Sign Up modal dialogs
+- 📱 **Responsive Design** — Mobile-first layout with slide-out navigation drawer
+- 🎨 **Tailwind CSS v4** — Custom color tokens, typography, and utility-first styling
+- ⚡ **Lazy Loading** — Routes loaded on demand (e.g., `/documentation`)
+- 🌐 **SSR Ready** — Angular Universal server-side rendering
+
+---
+
+## 🧰 Tech Stack
+
+| Technology | Version |
+|---|---|
+| Angular | 21.x |
+| Angular SSR | 21.x |
+| TailwindCSS | 4.x |
+| TypeScript | ~5.9 |
+| Iconify | 3.x |
+| Swiper.js | 12.x |
+
+---
+
+## 📁 Project Structure
+
+```
+elearn-client/
+├── public/                  # Static assets (images, SVGs)
+│   └── images/
+│       ├── courses/
+│       ├── documentation/
+│       └── ...
+├── src/
+│   ├── app/
+│   │   ├── core/            # Services and data models
+│   │   ├── features/        # Page-level feature modules
+│   │   │   ├── home/        # Home page components
+│   │   │   └── documentation/ # Documentation page & sub-components
+│   │   ├── shared/          # Shared layouts (Header, Footer)
+│   │   ├── app.component.ts
+│   │   └── app.routes.ts
+│   ├── styles.css
+│   └── main.ts
+├── angular.json
+├── package.json
+└── tsconfig.json
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+---
 
-## Code scaffolding
+## 🚀 Getting Started
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+### Prerequisites
 
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+- **Node.js** v20+ — [Download](https://nodejs.org/)
+- **npm** v10+
+- **Angular CLI** v21+ (optional, for scaffolding)
 
 ```bash
-ng generate --help
+npm install -g @angular/cli
 ```
 
-## Building
-
-To build the project run:
+### Installation
 
 ```bash
-ng build
+# 1. Clone the repository
+git clone <your-repo-url>
+cd elearn-client
+
+# 2. Install dependencies
+npm install
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+### Development Server
 
-## Running unit tests
+```bash
+npm start
+```
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+Open your browser at **http://localhost:4200**. The app hot-reloads on file changes.
+
+### Production Build
+
+```bash
+npm run build
+```
+
+Output will be placed in the `dist/elearn-client` directory.
+
+---
+
+## 🛣️ Routes
+
+| Path | Component | Description |
+|---|---|---|
+| `/` | `HomeComponent` | Main landing page |
+| `/documentation` | `DocumentationComponent` | In-app documentation (lazy loaded) |
+
+---
+
+## 🧪 Testing
+
+Run unit tests using [Vitest](https://vitest.dev/):
 
 ```bash
 ng test
 ```
 
-## Running end-to-end tests
+---
 
-For end-to-end (e2e) testing, run:
+## 📜 License
 
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+This project is open source and available under the [MIT License](LICENSE).

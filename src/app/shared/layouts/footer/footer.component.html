@@ -1,0 +1,114 @@
+<div class="bg-primary" id="first-section">
+  <div class="container pt-60 pb-10">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-16 xl:gap-8">
+      <div class="col-span-4 flex flex-col gap-5">
+        <div>
+          <img
+            src="/images/logo/logo2.svg"
+            alt="Logo"
+            width="48"
+            height="64"
+          />
+        </div>
+        <p class="text-white text-lg font-medium leading-7">
+          Level up your skills, and get dream <br /> job with passion.
+        </p>
+        <div class="flex gap-4">
+          <a
+            href="javascript:void(0)"
+            class="bg-white/20 rounded-full p-2 text-white hover:bg-cream hover:text-primary duration-300">
+            <iconify-icon
+              icon="tabler:brand-instagram"
+              class="text-2xl inline-block"
+            ></iconify-icon>
+          </a>
+          <a
+            href="javascript:void(0)"
+            class="bg-white/20 rounded-full p-2 text-white hover:bg-cream hover:text-primary duration-300">
+            <iconify-icon
+              icon="tabler:brand-dribbble"
+              class="text-2xl inline-block"
+            ></iconify-icon>
+          </a>
+          <a
+            href="javascript:void(0)"
+            class="bg-white/20 rounded-full p-2 text-white hover:bg-cream hover:text-primary duration-300">
+            <iconify-icon
+              icon="tabler:brand-twitter-filled"
+              class="text-2xl inline-block"
+            ></iconify-icon>
+          </a>
+          <a
+            href="javascript:void(0)"
+            class="bg-white/20 rounded-full p-2 text-white hover:bg-cream hover:text-primary duration-300">
+            <iconify-icon
+              icon="tabler:brand-youtube-filled"
+              class="text-2xl inline-block"
+            ></iconify-icon>
+          </a>
+        </div>
+      </div>
+
+      <!-- CLOUMN-2/3 -->
+      <div class="col-span-4">
+        <div class="flex gap-20">
+          @for (product of footerlink; track product.section) {
+            <div class="group relative col-span-2">
+              <p class="text-white text-xl font-semibold mb-9">
+                {{ product.section }}
+              </p>
+              <ul>
+                @for (item of product.links; track item.label) {
+                  <li class="mb-3">
+                    <a
+                      [href]="item.href"
+                      (click)="scrollTo(item.href, $event)"
+                      class="text-white/60 hover:text-white text-sm font-normal mb-6 cursor-pointer">
+                      {{ item.label }}
+                    </a>
+                  </li>
+                }
+              </ul>
+            </div>
+          }
+        </div>
+      </div>
+      <!-- CLOUMN-4 -->
+
+      <div class="col-span-4">
+        <h3 class="text-white text-xl font-semibold mb-6">
+          Stay up to date
+        </h3>
+        <div class="relative text-white focus-within:text-white flex flex-row-reverse w-[50%] lg:w-full">
+          <input
+            type="email"
+            class="py-4 text-sm w-full text-white bg-white/15 rounded-md pl-4 focus:outline-hidden bg-emailbg focus:text-white"
+            placeholder="Your email address"
+            autocomplete="off"
+          />
+          <div class="absolute inset-y-0 right-0 flex items-center pr-2">
+            <button
+              type="submit"
+              class="p-1 focus:outline-hidden focus:shadow-outline">
+              <iconify-icon
+                icon="tabler:send"
+                class="text-white text-2xl inline-block me-2"
+              ></iconify-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="py-3">
+    <h3 class="text-center text-white/60">
+      @2025 - All Rights Reserved by
+      <a
+        href="https://adminmart.com/"
+        target="_blank"
+        class="hover:text-white">
+        GetNextJs Templates.com
+      </a>
+    </h3>
+  </div>
+</div>
