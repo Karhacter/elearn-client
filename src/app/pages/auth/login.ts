@@ -1,17 +1,47 @@
-import { Component } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { Component, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
+import { RouterModule, Router } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { CheckboxModule } from 'primeng/checkbox';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
 import { RippleModule } from 'primeng/ripple';
 import { AppFloatingConfigurator } from '../../layout/component/app.floatingconfigurator';
+import { AuthService } from '../../core/services/auth.service';
+
+export function passwordSecurityValidator(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+        const value = control.value;
+        if (!value) return null;
+
+        const hasMinLength = value.length >= 8;
+        const hasUpperCase = /[A-Z]/.test(value);
+        const hasLowerCase = /[a-z]/.test(value);
+        const hasNumeric = /[0-9]/.test(value);
+        const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/.test(value);
+
+        const isValid = hasMinLength && hasUpperCase && hasLowerCase && hasNumeric && hasSpecialChar;
+
+        if (!isValid) {
+            return {
+                passwordSecurity: {
+                    hasMinLength,
+                    hasUpperCase,
+                    hasLowerCase,
+                    hasNumeric,
+                    hasSpecialChar
+                }
+            };
+        }
+        return null;
+    };
+}
 
 @Component({
     selector: 'app-login',
     standalone: true,
-    imports: [ButtonModule, CheckboxModule, InputTextModule, PasswordModule, FormsModule, RouterModule, RippleModule, AppFloatingConfigurator],
+    imports: [CommonModule, ReactiveFormsModule, ButtonModule, CheckboxModule, InputTextModule, PasswordModule, RouterModule, RippleModule, AppFloatingConfigurator],
     template: `
         <app-floating-configurator />
         <div class="bg-surface-50 dark:bg-surface-950 flex items-center justify-center min-h-screen min-w-screen overflow-hidden">
@@ -36,26 +66,44 @@ import { AppFloatingConfigurator } from '../../layout/component/app.floatingconf
                                     />
                                 </g>
                             </svg>
-                            <div class="text-surface-900 dark:text-surface-0 text-3xl font-medium mb-4">Welcome to PrimeLand!</div>
                             <span class="text-muted-color font-medium">Sign in to continue</span>
                         </div>
 
-                        <div>
+                        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
                             <label for="email1" class="block text-surface-900 dark:text-surface-0 text-xl font-medium mb-2">Email</label>
-                            <input pInputText id="email1" type="text" placeholder="Email address" class="w-full md:w-120 mb-8" [(ngModel)]="email" />
+                            <input pInputText id="email1" type="text" placeholder="Email address" class="w-full md:w-120 mb-2" formControlName="email" />
+                            <div class="mb-4 text-red-500 text-sm" *ngIf="loginForm.get('email')?.invalid && (loginForm.get('email')?.dirty || loginForm.get('email')?.touched)">
+                                <span *ngIf="loginForm.get('email')?.errors?.['required']">Email is required.</span>
+                                <span *ngIf="loginForm.get('email')?.errors?.['email']">Must be a valid email format.</span>
+                            </div>
 
                             <label for="password1" class="block text-surface-900 dark:text-surface-0 font-medium text-xl mb-2">Password</label>
-                            <p-password id="password1" [(ngModel)]="password" placeholder="Password" [toggleMask]="true" styleClass="mb-4" [fluid]="true" [feedback]="false"></p-password>
+                            <p-password id="password1" formControlName="password" placeholder="Password" [toggleMask]="true" styleClass="mb-2" [fluid]="true" [feedback]="false"></p-password>
+                            <div class="mb-4 text-red-500 text-sm" *ngIf="loginForm.get('password')?.invalid && (loginForm.get('password')?.dirty || loginForm.get('password')?.touched)">
+                                <span *ngIf="loginForm.get('password')?.errors?.['required']">Password is required.</span>
+                                <div *ngIf="loginForm.get('password')?.errors?.['passwordSecurity']" class="flex flex-col mt-1">
+                                    <span [class.text-green-500]="loginForm.get('password')?.errors?.['passwordSecurity'].hasMinLength" [class.text-red-500]="!loginForm.get('password')?.errors?.['passwordSecurity'].hasMinLength">• At least 8 characters long</span>
+                                    <span [class.text-green-500]="loginForm.get('password')?.errors?.['passwordSecurity'].hasUpperCase" [class.text-red-500]="!loginForm.get('password')?.errors?.['passwordSecurity'].hasUpperCase">• At least one uppercase letter</span>
+                                    <span [class.text-green-500]="loginForm.get('password')?.errors?.['passwordSecurity'].hasLowerCase" [class.text-red-500]="!loginForm.get('password')?.errors?.['passwordSecurity'].hasLowerCase">• At least one lowercase letter</span>
+                                    <span [class.text-green-500]="loginForm.get('password')?.errors?.['passwordSecurity'].hasNumeric" [class.text-red-500]="!loginForm.get('password')?.errors?.['passwordSecurity'].hasNumeric">• At least one number</span>
+                                    <span [class.text-green-500]="loginForm.get('password')?.errors?.['passwordSecurity'].hasSpecialChar" [class.text-red-500]="!loginForm.get('password')?.errors?.['passwordSecurity'].hasSpecialChar">• At least one special character</span>
+                                </div>
+                            </div>
 
                             <div class="flex items-center justify-between mt-2 mb-8 gap-8">
                                 <div class="flex items-center">
-                                    <p-checkbox [(ngModel)]="checked" id="rememberme1" binary class="mr-2"></p-checkbox>
+                                    <p-checkbox formControlName="rememberMe" id="rememberme1" binary class="mr-2"></p-checkbox>
                                     <label for="rememberme1">Remember me</label>
                                 </div>
                                 <span class="font-medium no-underline ml-2 text-right cursor-pointer text-primary">Forgot password?</span>
                             </div>
-                            <p-button label="Sign In" styleClass="w-full" routerLink="/"></p-button>
-                        </div>
+
+                            <div *ngIf="errorMessage" class="mb-4 p-3 bg-red-100 text-red-700 rounded border border-red-300">
+                                {{ errorMessage }}
+                            </div>
+
+                            <p-button label="Sign In" styleClass="w-full" type="submit" [disabled]="loginForm.invalid || isLoading" [loading]="isLoading"></p-button>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -63,9 +111,55 @@ import { AppFloatingConfigurator } from '../../layout/component/app.floatingconf
     `
 })
 export class Login {
-    email: string = '';
+    private readonly fb = inject(FormBuilder);
+    private readonly authService = inject(AuthService);
+    private readonly router = inject(Router);
 
-    password: string = '';
+    isLoading = false;
+    errorMessage = '';
 
-    checked: boolean = false;
+    loginForm: FormGroup = this.fb.group({
+        email: ['', [Validators.required, Validators.email]],
+        password: ['', [Validators.required, passwordSecurityValidator()]],
+        rememberMe: [false]
+    });
+
+    onSubmit() {
+        if (this.loginForm.invalid) {
+            this.loginForm.markAllAsTouched();
+            return;
+        }
+
+        this.isLoading = true;
+        this.errorMessage = '';
+
+        const { email, password } = this.loginForm.value;
+
+        this.authService.login({ email, password }).subscribe({
+            next: (response) => {
+                // After successful login, check auth to verify role as requested
+                this.authService.checkAuth().subscribe({
+                    next: (authResponse) => {
+                        this.isLoading = false;
+                        const role = authResponse.data?.user?.role || authResponse.data?.role;
+                        console.log(role);
+
+                        if (role && role.toUpperCase() === 'ADMIN' || role && role.toUpperCase() === 'INSTRUCTOR' || role && role.toUpperCase() === 'MODERATOR') {
+                            this.router.navigate(['/']);
+                        } else {
+                            this.router.navigate(['/auth/access']);
+                        }
+                    },
+                    error: (err) => {
+                        this.isLoading = false;
+                        this.errorMessage = 'Auth check failed after login.';
+                    }
+                });
+            },
+            error: (err) => {
+                this.isLoading = false;
+                this.errorMessage = err.error?.message || 'Login failed. Please check your credentials.';
+            }
+        });
+    }
 }

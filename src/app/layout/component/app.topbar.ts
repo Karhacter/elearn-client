@@ -1,15 +1,17 @@
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject, input, OnInit } from '@angular/core';
 import { MenuItem } from 'primeng/api';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { StyleClassModule } from 'primeng/styleclass';
+import { MenuModule } from 'primeng/menu';
+import { AuthService } from '../../core/services/auth.service';
 import { AppConfigurator } from './app.configurator';
 import { LayoutService } from '@/app/layout/service/layout.service';
 
 @Component({
     selector: 'app-topbar',
     standalone: true,
-    imports: [RouterModule, CommonModule, StyleClassModule, AppConfigurator],
+    imports: [RouterModule, CommonModule, StyleClassModule, AppConfigurator, MenuModule],
     template: ` <div class="layout-topbar">
         <div class="layout-topbar-logo-container">
             <button class="layout-menu-button layout-topbar-action" (click)="layoutService.onMenuToggle()">
@@ -36,26 +38,12 @@ import { LayoutService } from '@/app/layout/service/layout.service';
                 <span>SAKAI</span>
             </a>
         </div>
-
+        <!-- dark mode -->
         <div class="layout-topbar-actions">
             <div class="layout-config-menu">
                 <button type="button" class="layout-topbar-action" (click)="toggleDarkMode()">
                     <i [ngClass]="{ 'pi ': true, 'pi-moon': layoutService.isDarkTheme(), 'pi-sun': !layoutService.isDarkTheme() }"></i>
                 </button>
-                <div class="relative">
-                    <button
-                        class="layout-topbar-action layout-topbar-action-highlight"
-                        pStyleClass="@next"
-                        enterFromClass="hidden"
-                        enterActiveClass="animate-scalein"
-                        leaveToClass="hidden"
-                        leaveActiveClass="animate-fadeout"
-                        [hideOnOutsideClick]="true"
-                    >
-                        <i class="pi pi-palette"></i>
-                    </button>
-                    <app-configurator />
-                </div>
             </div>
 
             <button class="layout-topbar-menu-button layout-topbar-action" pStyleClass="@next" enterFromClass="hidden" enterActiveClass="animate-scalein" leaveToClass="hidden" leaveActiveClass="animate-fadeout" [hideOnOutsideClick]="true">
@@ -65,6 +53,10 @@ import { LayoutService } from '@/app/layout/service/layout.service';
             <div class="layout-topbar-menu hidden lg:block">
                 <div class="layout-topbar-menu-content">
                     <button type="button" class="layout-topbar-action">
+                        <i class="pi pi-bell"></i>
+                        <span>Notifications</span>
+                    </button>
+                    <button type="button" class="layout-topbar-action">
                         <i class="pi pi-calendar"></i>
                         <span>Calendar</span>
                     </button>
@@ -72,24 +64,81 @@ import { LayoutService } from '@/app/layout/service/layout.service';
                         <i class="pi pi-inbox"></i>
                         <span>Messages</span>
                     </button>
-                    <button type="button" class="layout-topbar-action">
+                    <button type="button" class="layout-topbar-action" (click)="profileMenu.toggle($event)">
                         <i class="pi pi-user"></i>
                         <span>Profile</span>
                     </button>
+                    <p-menu #profileMenu [model]="profileMenuItems" [popup]="true"></p-menu>
                 </div>
             </div>
         </div>
     </div>`
 })
-export class AppTopbar {
+export class AppTopbar implements OnInit {
     items!: MenuItem[];
+    profileMenuItems!: MenuItem[];
 
     layoutService = inject(LayoutService);
+    authService = inject(AuthService);
+    router = inject(Router);
+
+    float = input<boolean>(true);
+
+    isDarkTheme = computed(() => this.layoutService.layoutConfig().darkTheme);
+
+    ngOnInit() {
+        if (typeof window !== 'undefined') {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                const isDark = savedTheme === 'dark';
+                this.layoutService.layoutConfig.update((state) => ({ ...state, darkTheme: isDark }));
+            }
+        }
+
+        // Setup default menu then fetch actual username
+        this.updateProfileMenu('User');
+
+        this.authService.checkAuth().subscribe({
+            next: (response) => {
+                const user = response.data?.user || response.data;
+                const name = (user as any)?.name || (user as any)?.fullName || 'User';
+                this.updateProfileMenu(name);
+            },
+            error: () => this.updateProfileMenu('User')
+        });
+    }
+
+    private updateProfileMenu(name: string) {
+        this.profileMenuItems = [
+            {
+                label: `Hello, ${name}`,
+                icon: 'pi pi-user',
+                styleClass: 'font-bold'
+            },
+            {
+                label: 'Settings',
+                icon: 'pi pi-cog'
+            },
+            {
+                label: 'Logout',
+                styleClass: 'text-red',
+                icon: 'pi pi-sign-out',
+                command: () => {
+                    this.authService.logout()?.subscribe(() => {
+                        this.router.navigate(['/auth/login']);
+                    });
+                }
+            }
+        ];
+    }
 
     toggleDarkMode() {
-        this.layoutService.layoutConfig.update((state) => ({
-            ...state,
-            darkTheme: !state.darkTheme
-        }));
+        this.layoutService.layoutConfig.update((state) => {
+            const isDark = !state.darkTheme;
+            if (typeof window !== 'undefined') {
+                localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            }
+            return { ...state, darkTheme: isDark };
+        });
     }
 }
