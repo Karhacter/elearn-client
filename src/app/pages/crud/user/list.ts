@@ -15,6 +15,7 @@ import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { UserService, User } from '@/app/core/services/user.service';
+import { Router } from '@angular/router';
 
 interface Column {
     field: string;
@@ -30,22 +31,7 @@ interface ExportColumn {
 @Component({
     selector: 'app-user-list',
     standalone: true,
-    imports: [
-        CommonModule,
-        TableModule,
-        FormsModule,
-        ButtonModule,
-        RippleModule,
-        ToastModule,
-        ToolbarModule,
-        InputTextModule,
-        DialogModule,
-        TagModule,
-        SelectModule,
-        InputIconModule,
-        IconFieldModule,
-        ConfirmDialogModule
-    ],
+    imports: [CommonModule, TableModule, FormsModule, ButtonModule, RippleModule, ToastModule, ToolbarModule, InputTextModule, DialogModule, TagModule, SelectModule, InputIconModule, IconFieldModule, ConfirmDialogModule],
     template: `
         <p-toolbar styleClass="mb-6">
             <ng-template #start>
@@ -87,22 +73,12 @@ interface ExportColumn {
                     <th style="width: 3rem">
                         <p-tableHeaderCheckbox />
                     </th>
-                    <th pSortableColumn="userId" style="min-width: 8rem">
-                        ID <p-sortIcon field="userId" />
-                    </th>
+                    <th pSortableColumn="userId" style="min-width: 8rem">ID <p-sortIcon field="userId" /></th>
                     <th>Avatar</th>
-                    <th pSortableColumn="fullName" style="min-width:16rem">
-                        Full Name <p-sortIcon field="fullName" />
-                    </th>
-                    <th pSortableColumn="email" style="min-width: 16rem">
-                        Email <p-sortIcon field="email" />
-                    </th>
-                    <th pSortableColumn="phoneNumber" style="min-width:12rem">
-                        Phone <p-sortIcon field="phoneNumber" />
-                    </th>
-                    <th pSortableColumn="role" style="min-width: 12rem">
-                        Role <p-sortIcon field="role" />
-                    </th>
+                    <th pSortableColumn="fullName" style="min-width:16rem">Full Name <p-sortIcon field="fullName" /></th>
+                    <th pSortableColumn="email" style="min-width: 16rem">Email <p-sortIcon field="email" /></th>
+                    <th pSortableColumn="phoneNumber" style="min-width:12rem">Phone <p-sortIcon field="phoneNumber" /></th>
+                    <th pSortableColumn="role" style="min-width: 12rem">Role <p-sortIcon field="role" /></th>
                     <th style="min-width: 12rem"></th>
                 </tr>
             </ng-template>
@@ -113,7 +89,7 @@ interface ExportColumn {
                     </td>
                     <td>{{ user.userId }}</td>
                     <td>
-                        <img [src]="user.profilePicture || 'https://primefaces.org/cdn/primeng/images/demo/avatar/amyelsner.png'" [alt]="user.fullName" style="width: 32px; height: 32px; object-fit: cover;" class="rounded-full" />
+                        <img [src]="getProfilePictureUrl(user.profilePicture)" [alt]="user.fullName" style="width: 32px; height: 32px; object-fit: cover;" class="rounded-full" />
                     </td>
                     <td>{{ user.fullName }}</td>
                     <td>{{ user.email }}</td>
@@ -123,48 +99,13 @@ interface ExportColumn {
                     </td>
                     <td>
                         <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true" (click)="editUser(user)" />
-                        <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" (click)="deleteUser(user)" />
+                        <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" (click)="softDeleteUser(user)" />
                     </td>
                 </tr>
             </ng-template>
         </p-table>
 
-        <p-dialog [(visible)]="userDialog" [style]="{ width: '450px' }" header="User Details" [modal]="true">
-            <ng-template #content>
-                <div class="flex flex-col gap-6">
-                    <img [src]="user.profilePicture || 'https://primefaces.org/cdn/primeng/images/demo/avatar/amyelsner.png'" [alt]="user.fullName" class="block m-auto pb-4 rounded-full" *ngIf="user.profilePicture || user.userId" style="width: 80px; height: 80px; object-fit: cover;"/>
-                    
-                    <div>
-                        <label for="fullName" class="block font-bold mb-3">Full Name</label>
-                        <input type="text" pInputText id="fullName" [(ngModel)]="user.fullName" required autofocus fluid />
-                        <small class="text-red-500" *ngIf="submitted && !user.fullName">Full Name is required.</small>
-                    </div>
-
-                    <div>
-                        <label for="email" class="block font-bold mb-3">Email</label>
-                        <input type="email" pInputText id="email" [(ngModel)]="user.email" required fluid />
-                        <small class="text-red-500" *ngIf="submitted && !user.email">Email is required.</small>
-                    </div>
-
-                    <div>
-                        <label for="phoneNumber" class="block font-bold mb-3">Phone Number</label>
-                        <input type="text" pInputText id="phoneNumber" [(ngModel)]="user.phoneNumber" fluid />
-                    </div>
-
-                    <div>
-                        <label for="role" class="block font-bold mb-3">Role</label>
-                        <p-select [(ngModel)]="user.role" inputId="role" [options]="roles" optionLabel="label" optionValue="value" placeholder="Select a Role" fluid />
-                    </div>
-                </div>
-            </ng-template>
-
-            <ng-template #footer>
-                <p-button label="Cancel" icon="pi pi-times" text (click)="hideDialog()" />
-                <p-button label="Save" icon="pi pi-check" (click)="saveUser()" />
-            </ng-template>
-        </p-dialog>
-
-        <p-confirmdialog [style]="{ width: '450px' }" />
+        <p-confirmDialog [style]="{ width: '450px' }" />
     `,
     providers: [MessageService, ConfirmationService]
 })
@@ -195,7 +136,8 @@ export class UserList implements OnInit {
     constructor(
         private userService: UserService,
         private messageService: MessageService,
-        private confirmationService: ConfirmationService
+        private confirmationService: ConfirmationService,
+        private router: Router
     ) {}
 
     exportCSV() {
@@ -233,15 +175,22 @@ export class UserList implements OnInit {
         table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
     }
 
-    openNew() {
-        this.user = {};
-        this.submitted = false;
-        this.userDialog = true;
+    openNew(): void {
+        this.router.navigate(['/pages/crud/user/create'], {
+            state: {
+                from: 'user-list',
+                timestamp: Date.now()
+            }
+        });
     }
 
     editUser(user: User) {
-        this.user = { ...user };
-        this.userDialog = true;
+        this.router.navigate(['/pages/crud/user/edit', user.userId], {
+            state: {
+                from: 'user-list',
+                timestamp: Date.now()
+            }
+        });
     }
 
     deleteSelectedUsers() {
@@ -262,15 +211,22 @@ export class UserList implements OnInit {
         this.submitted = false;
     }
 
-    deleteUser(user: User) {
+    softDeleteUser(user: User) {
         this.confirmationService.confirm({
             message: 'Are you sure you want to delete ' + user.fullName + '?',
             header: 'Confirm',
             icon: 'pi pi-exclamation-triangle',
             accept: () => {
-                this.users.set(this.users().filter((val) => val.userId !== user.userId));
-                this.user = {};
-                this.messageService.add({ severity: 'success', summary: 'Successful', detail: 'User Deleted (Local Only)', life: 3000 });
+                this.userService.softDeleteUser(user.userId!).subscribe({
+                    next: () => {
+                        this.users.set(this.users().filter((val) => val.userId !== user.userId));
+                        this.user = {};
+                        this.messageService.add({ severity: 'success', summary: 'Successful', detail: 'User Deleted ( Moved To Trash )', life: 3000 });
+                    },
+                    error: (err) => {
+                        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Could not delete user', life: 3000 });
+                    }
+                });
             }
         });
     }
@@ -290,25 +246,10 @@ export class UserList implements OnInit {
         }
     }
 
-    saveUser() {
-        this.submitted = true;
-        let _users = this.users();
-        if (this.user.fullName?.trim() && this.user.email?.trim()) {
-            if (this.user.userId) {
-                const index = _users.findIndex((u) => u.userId === this.user.userId);
-                if (index !== -1) {
-                    _users[index] = this.user;
-                }
-                this.users.set([..._users]);
-                this.messageService.add({ severity: 'success', summary: 'Successful', detail: 'User Updated (Local Only)', life: 3000 });
-            } else {
-                this.user.userId = Math.floor(Math.random() * 1000) + 1; // Temporary mock id
-                this.users.set([..._users, this.user]);
-                this.messageService.add({ severity: 'success', summary: 'Successful', detail: 'User Created (Local Only)', life: 3000 });
-            }
-
-            this.userDialog = false;
-            this.user = {};
+    getProfilePictureUrl(path?: string) {
+        if (!path) {
+            return 'https://primefaces.org/cdn/primeng/images/demo/avatar/amyelsner.png';
         }
+        return `http://localhost:5263/${path}`;
     }
 }

@@ -23,7 +23,7 @@ import { ToastModule } from 'primeng/toast';
             </div>
             <div class="col-span-full lg:col-span-6">
                 <div class="card">
-                   <div class="font-semibold text-xl mb-4">Upload Thumbnail</div>
+                    <div class="font-semibold text-xl mb-4">Upload Thumbnail</div>
                     <p-fileupload name="demo[]" (onUpload)="onUpload($event)" [multiple]="true" accept="image/*" maxFileSize="10000000000" mode="advanced" url="https://www.primefaces.org/cdn/api/upload.php">
                         <ng-template #empty>
                             <div>Drag and drop files to here to upload.</div>
@@ -31,9 +31,9 @@ import { ToastModule } from 'primeng/toast';
                     </p-fileupload>
                 </div>
             </div>
-                    <div class="col-span-full lg:col-span-6">
+            <div class="col-span-full lg:col-span-6">
                 <div class="card">
-                   <div class="font-semibold text-xl mb-4">Upload Video</div>
+                    <div class="font-semibold text-xl mb-4">Upload Video</div>
                     <p-fileupload name="demo[]" (onUpload)="onUpload($event)" [multiple]="true" accept="image/*" maxFileSize="10000000000" mode="advanced" url="https://www.primefaces.org/cdn/api/upload.php">
                         <ng-template #empty>
                             <div>Drag and drop files to here to upload.</div>
@@ -43,7 +43,6 @@ import { ToastModule } from 'primeng/toast';
             </div>
         </div>`,
     providers: [MessageService]
-
 })
 export class FileDemo {
     uploadedFiles: any[] = [];
@@ -64,4 +63,3 @@ export class FileDemo {
 
     // them 2 button , 1 cho thumbnail, 1 cho upload video
 }
-    

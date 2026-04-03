@@ -17,7 +17,7 @@ import { AuthService } from '@/app/core/services/auth.service';
                 <li class="menu-separator"></li>
             }
         }
-    </ul> `,
+    </ul> `
 })
 export class AppMenu implements OnInit {
     model: MenuItem[] = [];
@@ -28,7 +28,7 @@ export class AppMenu implements OnInit {
         const isAdmin = user?.role?.toUpperCase() === 'ADMIN';
 
         this.model = [
-            // Trang chu 
+            // Trang chu
             {
                 label: 'Home',
                 items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', routerLink: ['/'] }]
@@ -40,15 +40,20 @@ export class AppMenu implements OnInit {
                 items: [
                     {
                         label: 'User',
-                        path:'/user',
+                        path: '/user',
                         icon: 'pi pi-fw pi-users',
                         // PrimeNG property to natively hide it if false
                         visible: isAdmin,
-                        items:[
+                        items: [
                             {
                                 label: 'List',
                                 icon: 'pi pi-fw pi-pencil',
                                 routerLink: ['/pages/crud/user/list']
+                            },
+                            {
+                                label: 'Create',
+                                icon: 'pi pi-fw pi-plus',
+                                routerLink: ['/pages/crud/user/create']
                             },
                             {
                                 label: 'Trash',
@@ -58,15 +63,10 @@ export class AppMenu implements OnInit {
                         ]
                     },
                     {
-                        label: 'Crud',
-                        icon: 'pi pi-fw pi-pencil',
-                        routerLink: ['/pages/crud']
-                    },
-                    {
                         label: 'Course',
                         icon: 'pi pi-fw pi-tag',
                         path: '/crud/course',
-                        items:[
+                        items: [
                             {
                                 label: 'List',
                                 icon: 'pi pi-fw pi-pencil',
@@ -112,7 +112,6 @@ export class AppMenu implements OnInit {
                 ]
             },
 
-             
             // submenu
             {
                 label: 'Settings',

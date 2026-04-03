@@ -11,18 +11,17 @@ import { ProgressBarModule } from 'primeng/progressbar';
 import { CardModule } from 'primeng/card';
 import { FileUploadModule } from 'primeng/fileupload';
 import { DividerModule } from 'primeng/divider';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { UserService } from '@/app/core/services/user.service';
-import { passwordSecurityValidator } from '../../../core/utils/validators';
 
 @Component({
     selector: 'app-user-create',
     standalone: true,
-    imports: [CommonModule, ReactiveFormsModule, ButtonModule, InputTextModule, SelectModule, PasswordModule, ToastModule, ProgressBarModule, CardModule, FileUploadModule, DividerModule],
+    imports: [CommonModule, ReactiveFormsModule, ButtonModule, InputTextModule, SelectModule, ToastModule, ProgressBarModule, CardModule, FileUploadModule, DividerModule],
     providers: [MessageService],
     template: `
         <div class="mb-4">
-            <h4 class="m-0 font-bold">Create New User</h4>
+            <h4 class="m-0 font-bold">Update User</h4>
         </div>
 
         <p-card>
@@ -48,38 +47,21 @@ import { passwordSecurityValidator } from '../../../core/utils/validators';
 
                         <div class="flex flex-col gap-3">
                             <label for="phoneNumber" class="font-medium text-surface-900 dark:text-surface-0">Phone Number</label>
-                            <input pInputText id="phoneNumber" formControlName="phoneNumber" placeholder="Enter phone number" class="p-4 text-lg w-full" [class.ng-invalid]="isFieldInvalid('phoneNumber')" [class.ng-dirty]="isFieldInvalid('phoneNumber')" />
+                            <input
+                                pInputText
+                                id="phoneNumber"
+                                formControlName="phoneNumber"
+                                placeholder="Enter phone number"
+                                class="p-4 text-lg w-full"
+                                [class.ng-invalid]="isFieldInvalid('phoneNumber')"
+                                [class.ng-dirty]="isFieldInvalid('phoneNumber')"
+                            />
                             <small class="p-error" *ngIf="isFieldInvalid('phoneNumber')">Phone Number is required.</small>
                         </div>
                     </div>
 
                     <!-- Right Column: Security & Role -->
                     <div class="flex flex-col gap-10">
-                        <div class="flex flex-col gap-3">
-                            <label for="password" class="font-medium text-surface-900 dark:text-surface-0">Password</label>
-                            <p-password
-                                id="password"
-                                formControlName="password"
-                                [toggleMask]="true"
-                                placeholder="********"
-                                [feedback]="false"
-                                styleClass="w-full"
-                                inputStyleClass="w-full p-4 text-lg"
-                                [class.ng-invalid]="isFieldInvalid('password')"
-                                [class.ng-dirty]="isFieldInvalid('password')"
-                            />
-                            <div class="mt-1 text-red-500 text-xs" *ngIf="isFieldInvalid('password')">
-                                <span *ngIf="userForm.get('password')?.errors?.['required']">Password is required.</span>
-                                <div *ngIf="userForm.get('password')?.errors?.['passwordSecurity']" class="flex flex-col gap-1 mt-1">
-                                    <span [class.text-green-500]="userForm.get('password')?.errors?.['passwordSecurity'].hasMinLength" [class.text-red-500]="!userForm.get('password')?.errors?.['passwordSecurity'].hasMinLength">• At least 8 characters long</span>
-                                    <span [class.text-green-500]="userForm.get('password')?.errors?.['passwordSecurity'].hasUpperCase" [class.text-red-500]="!userForm.get('password')?.errors?.['passwordSecurity'].hasUpperCase">• At least one uppercase letter</span>
-                                    <span [class.text-green-500]="userForm.get('password')?.errors?.['passwordSecurity'].hasLowerCase" [class.text-red-500]="!userForm.get('password')?.errors?.['passwordSecurity'].hasLowerCase">• At least one lowercase letter</span>
-                                    <span [class.text-green-500]="userForm.get('password')?.errors?.['passwordSecurity'].hasNumeric" [class.text-red-500]="!userForm.get('password')?.errors?.['passwordSecurity'].hasNumeric">• At least one number</span>
-                                    <span [class.text-green-500]="userForm.get('password')?.errors?.['passwordSecurity'].hasSpecialChar" [class.text-red-500]="!userForm.get('password')?.errors?.['passwordSecurity'].hasSpecialChar">• At least one special character</span>
-                                </div>
-                            </div>
-                        </div>
-
                         <div class="flex flex-col gap-3">
                             <label for="role" class="font-medium text-surface-900 dark:text-surface-0">System Role</label>
                             <p-select id="role" [options]="roles" formControlName="role" optionLabel="name" optionValue="value" placeholder="Select a role" styleClass="w-full p-2 text-lg" />
@@ -108,7 +90,7 @@ import { passwordSecurityValidator } from '../../../core/utils/validators';
                 <!-- Footer Actions -->
                 <div class="flex justify-end gap-3 mt-12 border-t border-surface-200 dark:border-surface-700 pt-8">
                     <p-button label="Cancel" severity="secondary" text (onClick)="onCancel()" />
-                    <p-button label="Create" icon="pi pi-check" type="submit" [disabled]="userForm.invalid || isSubmitting" [loading]="isSubmitting" />
+                    <p-button label="Update" icon="pi pi-check" type="submit" [disabled]="userForm.invalid || isSubmitting" [loading]="isSubmitting" />
                 </div>
             </form>
         </p-card>
@@ -116,16 +98,16 @@ import { passwordSecurityValidator } from '../../../core/utils/validators';
         <p-toast />
     `
 })
-export class UserCreate implements OnInit {
+export class UserEdit implements OnInit {
     userForm: FormGroup;
     previewUrl: string | null = null;
     selectedFile: File | null = null;
     isSubmitting = false;
+    userId: number | null = null;
 
     roles = [
         { name: 'ADMINISTRATOR', value: 'Admin' },
         { name: 'INSTRUCTOR', value: 'Instructor' },
-        { name: 'MODERATOR', value: 'Moderator' },
         { name: 'STUDENT', value: 'Student' }
     ];
 
@@ -133,18 +115,50 @@ export class UserCreate implements OnInit {
         private fb: FormBuilder,
         private messageService: MessageService,
         private router: Router,
+        private route: ActivatedRoute,
         private userService: UserService
     ) {
         this.userForm = this.fb.group({
             fullName: ['', Validators.required],
             email: ['', [Validators.required, Validators.email]],
             phoneNumber: ['', Validators.required],
-            password: ['', [Validators.required, passwordSecurityValidator()]],
             role: ['Student', Validators.required]
         });
     }
 
-    ngOnInit(): void {}
+    ngOnInit(): void {
+        const idParam = this.route.snapshot.paramMap.get('id');
+        if (idParam) {
+            this.userId = Number(idParam);
+            this.loadUser(this.userId);
+        } else {
+            this.handleError('User ID not found');
+            this.router.navigate(['/pages/crud/user/list']);
+        }
+    }
+
+    loadUser(id: number) {
+        this.userService.getUserById(id).subscribe({
+            next: (response) => {
+                const user = response.data;
+                if (user) {
+                    this.userForm.patchValue({
+                        fullName: user.fullName || '',
+                        email: user.email || '',
+                        phoneNumber: user.phoneNumber || '',
+                        role: user.role || 'Student'
+                    });
+
+                    if (user.profilePicture) {
+                        this.previewUrl = `http://localhost:5263/${user.profilePicture}`;
+                    }
+                }
+            },
+            error: (err) => {
+                this.handleError('Failed to load user details');
+            }
+        });
+    }
 
     isFieldInvalid(fieldName: string): boolean {
         const field = this.userForm.get(fieldName);
@@ -169,28 +183,28 @@ export class UserCreate implements OnInit {
     }
 
     onSubmit() {
-        if (this.userForm.valid) {
+        if (this.userForm.valid && this.userId) {
             this.isSubmitting = true;
             const userData = {
-                ...this.userForm.value,
-                isEmailVerified: 1
+                ...this.userForm.value
             };
 
-            this.userService.createUser(userData).subscribe({
+            this.userService.updateUser(this.userId, userData).subscribe({
                 next: (response) => {
-                    const userId = response.data?.userId || response.data?.id;
-
-                    if (this.selectedFile && userId) {
-                        this.userService.uploadUserImage(userId, this.selectedFile).subscribe({
+                    if (this.selectedFile) {
+                        this.userService.uploadUserImage(this.userId!, this.selectedFile).subscribe({
                             next: () => this.handleSuccess(userData.fullName),
-                            error: (err) => this.handleError('User created, but image upload failed.')
+                            error: (err) => {
+                                this.handleError('User updated, but image upload failed.');
+                                this.handleSuccess(userData.fullName);
+                            }
                         });
                     } else {
                         this.handleSuccess(userData.fullName);
                     }
                 },
                 error: (err) => {
-                    this.handleError(err.error?.message || 'Failed to initialize user creation.');
+                    this.handleError(err.error?.message || 'Failed to update user.');
                 }
             });
         } else {
@@ -206,7 +220,7 @@ export class UserCreate implements OnInit {
         this.messageService.add({
             severity: 'success',
             summary: 'Success',
-            detail: `User ${name} has been created successfully`
+            detail: `User ${name} has been updated successfully`
         });
         setTimeout(() => this.router.navigate(['/pages/crud/user/list']), 1000);
     }
