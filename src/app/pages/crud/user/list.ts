@@ -32,81 +32,7 @@ interface ExportColumn {
     selector: 'app-user-list',
     standalone: true,
     imports: [CommonModule, TableModule, FormsModule, ButtonModule, RippleModule, ToastModule, ToolbarModule, InputTextModule, DialogModule, TagModule, SelectModule, InputIconModule, IconFieldModule, ConfirmDialogModule],
-    template: `
-        <p-toolbar styleClass="mb-6">
-            <ng-template #start>
-                <p-button label="New" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()" />
-                <p-button severity="secondary" label="Delete" icon="pi pi-trash" outlined (onClick)="deleteSelectedUsers()" [disabled]="!selectedUsers || !selectedUsers.length" />
-            </ng-template>
-
-            <ng-template #end>
-                <p-button label="Export" icon="pi pi-upload" severity="secondary" (onClick)="exportCSV()" />
-            </ng-template>
-        </p-toolbar>
-
-        <p-table
-            #dt
-            [value]="users()"
-            [rows]="10"
-            [columns]="cols"
-            [paginator]="true"
-            [globalFilterFields]="['fullName', 'email', 'role', 'phoneNumber']"
-            [tableStyle]="{ 'min-width': '75rem' }"
-            [(selection)]="selectedUsers"
-            [rowHover]="true"
-            dataKey="userId"
-            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} users"
-            [showCurrentPageReport]="true"
-            [rowsPerPageOptions]="[10, 20, 30]"
-        >
-            <ng-template #caption>
-                <div class="flex items-center justify-between">
-                    <h5 class="m-0">Manage Users</h5>
-                    <p-iconfield>
-                        <p-inputicon styleClass="pi pi-search" />
-                        <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Search..." />
-                    </p-iconfield>
-                </div>
-            </ng-template>
-            <ng-template #header>
-                <tr>
-                    <th style="width: 3rem">
-                        <p-tableHeaderCheckbox />
-                    </th>
-                    <th pSortableColumn="userId" style="min-width: 8rem">ID <p-sortIcon field="userId" /></th>
-                    <th>Avatar</th>
-                    <th pSortableColumn="fullName" style="min-width:16rem">Full Name <p-sortIcon field="fullName" /></th>
-                    <th pSortableColumn="email" style="min-width: 16rem">Email <p-sortIcon field="email" /></th>
-                    <th pSortableColumn="phoneNumber" style="min-width:12rem">Phone <p-sortIcon field="phoneNumber" /></th>
-                    <th pSortableColumn="role" style="min-width: 12rem">Role <p-sortIcon field="role" /></th>
-                    <th style="min-width: 12rem"></th>
-                </tr>
-            </ng-template>
-            <ng-template #body let-user>
-                <tr>
-                    <td style="width: 3rem">
-                        <p-tableCheckbox [value]="user" />
-                    </td>
-                    <td>{{ user.userId }}</td>
-                    <td>
-                        <img [src]="getProfilePictureUrl(user.profilePicture)" [alt]="user.fullName" style="width: 32px; height: 32px; object-fit: cover;" class="rounded-full" />
-                    </td>
-                    <td>{{ user.fullName }}</td>
-                    <td>{{ user.email }}</td>
-                    <td>{{ user.phoneNumber || 'N/A' }}</td>
-                    <td>
-                        <p-tag [value]="user.role" [severity]="getRoleSeverity(user.role)" />
-                    </td>
-                    <td>
-                        <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true" (click)="editUser(user)" />
-                        <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" (click)="softDeleteUser(user)" />
-                    </td>
-                </tr>
-            </ng-template>
-        </p-table>
-
-        <p-confirmDialog [style]="{ width: '450px' }" />
-    `,
+    templateUrl: './list.html',
     providers: [MessageService, ConfirmationService]
 })
 export class UserList implements OnInit {
@@ -140,13 +66,14 @@ export class UserList implements OnInit {
         private router: Router
     ) {}
 
+    totalRecords: number = 0;
+    loading: boolean = true;
+
     exportCSV() {
         this.dt.exportCSV();
     }
 
     ngOnInit() {
-        this.loadUsers();
-
         this.cols = [
             { field: 'userId', header: 'ID' },
             { field: 'fullName', header: 'Full Name' },
@@ -158,25 +85,37 @@ export class UserList implements OnInit {
         this.exportColumns = this.cols.map((col) => ({ title: col.header, dataKey: col.field }));
     }
 
-    loadUsers() {
-        this.userService.getUsers().subscribe({
+    loadUsers(event?: any) {
+        this.loading = true;
+        const page = event && event.first !== undefined && event.rows !== undefined ? Math.floor(event.first / event.rows) + 1 : 1;
+        const pageSize = event && event.rows ? event.rows : 10;
+
+        this.userService.getUsers(page, pageSize).subscribe({
             next: (response) => {
                 if (response && response.data) {
-                    this.users.set(response.data);
+                    this.users.set(response.data.items || []);
+                    this.totalRecords = response.data.totalCount || 0;
                 }
+                this.loading = false;
             },
             error: (err) => {
                 this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Could not fetch users', life: 3000 });
+                this.loading = false;
             }
         });
     }
 
-    onGlobalFilter(table: Table, event: Event) {
-        table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
-    }
-
     openNew(): void {
         this.router.navigate(['/pages/crud/user/create'], {
+            state: {
+                from: 'user-list',
+                timestamp: Date.now()
+            }
+        });
+    }
+
+    viewUser(user: User) {
+        this.router.navigate(['/pages/crud/user/view', user.userId], {
             state: {
                 from: 'user-list',
                 timestamp: Date.now()
@@ -249,6 +188,9 @@ export class UserList implements OnInit {
     getProfilePictureUrl(path?: string) {
         if (!path) {
             return 'https://primefaces.org/cdn/primeng/images/demo/avatar/amyelsner.png';
+        }
+        if (path.startsWith('http')) {
+            return path;
         }
         return `http://localhost:5263/${path}`;
     }

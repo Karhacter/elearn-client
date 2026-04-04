@@ -29,84 +29,10 @@ interface ExportColumn {
 }
 
 @Component({
-    selector: 'app-user-list',
+    selector: 'app-user-trash',
     standalone: true,
     imports: [CommonModule, TableModule, FormsModule, ButtonModule, RippleModule, ToastModule, ToolbarModule, InputTextModule, DialogModule, TagModule, SelectModule, InputIconModule, IconFieldModule, ConfirmDialogModule],
-    template: `
-        <p-toolbar styleClass="mb-6">
-            <ng-template #start>
-                <p-button label="Restore" icon="pi pi-refresh" severity="secondary" class="mr-2" />
-                <p-button severity="secondary" label="Delete" icon="pi pi-trash" outlined (onClick)="deleteSelectedUsers()" [disabled]="!selectedUsers || !selectedUsers.length" />
-            </ng-template>
-
-            <ng-template #end>
-                <p-button label="Export" icon="pi pi-upload" severity="secondary" (onClick)="exportCSV()" />
-            </ng-template>
-        </p-toolbar>
-
-        <p-table
-            #dt
-            [value]="users()"
-            [rows]="10"
-            [columns]="cols"
-            [paginator]="true"
-            [globalFilterFields]="['fullName', 'email', 'role', 'phoneNumber']"
-            [tableStyle]="{ 'min-width': '75rem' }"
-            [(selection)]="selectedUsers"
-            [rowHover]="true"
-            dataKey="userId"
-            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} users"
-            [showCurrentPageReport]="true"
-            [rowsPerPageOptions]="[10, 20, 30]"
-        >
-            <ng-template #caption>
-                <div class="flex items-center justify-between">
-                    <h5 class="m-0">Manage Users</h5>
-                    <p-iconfield>
-                        <p-inputicon styleClass="pi pi-search" />
-                        <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Search..." />
-                    </p-iconfield>
-                </div>
-            </ng-template>
-            <ng-template #header>
-                <tr>
-                    <th style="width: 3rem">
-                        <p-tableHeaderCheckbox />
-                    </th>
-                    <th pSortableColumn="userId" style="min-width: 8rem">ID <p-sortIcon field="userId" /></th>
-                    <th>Avatar</th>
-                    <th pSortableColumn="fullName" style="min-width:16rem">Full Name <p-sortIcon field="fullName" /></th>
-                    <th pSortableColumn="email" style="min-width: 16rem">Email <p-sortIcon field="email" /></th>
-                    <th pSortableColumn="phoneNumber" style="min-width:12rem">Phone <p-sortIcon field="phoneNumber" /></th>
-                    <th pSortableColumn="role" style="min-width: 12rem">Role <p-sortIcon field="role" /></th>
-                    <th style="min-width: 12rem"></th>
-                </tr>
-            </ng-template>
-            <ng-template #body let-user>
-                <tr>
-                    <td style="width: 3rem">
-                        <p-tableCheckbox [value]="user" />
-                    </td>
-                    <td>{{ user.userId }}</td>
-                    <td>
-                        <img [src]="getProfilePictureUrl(user.profilePicture)" [alt]="user.fullName" style="width: 32px; height: 32px; object-fit: cover;" class="rounded-full" />
-                    </td>
-                    <td>{{ user.fullName }}</td>
-                    <td>{{ user.email }}</td>
-                    <td>{{ user.phoneNumber || 'N/A' }}</td>
-                    <td>
-                        <p-tag [value]="user.role" [severity]="getRoleSeverity(user.role)" />
-                    </td>
-                    <td>
-                        <p-button icon="pi pi-refresh" class="mr-2" [rounded]="true" [outlined]="true" (click)="restoreUser(user)" />
-                        <p-button icon="pi pi-times" severity="danger" [rounded]="true" [outlined]="true" (click)="deleteUser(user)" />
-                    </td>
-                </tr>
-            </ng-template>
-        </p-table>
-
-        <p-confirmDialog [style]="{ width: '450px' }" />
-    `,
+    templateUrl: './trash.html',
     providers: [MessageService, ConfirmationService]
 })
 export class UserTrash implements OnInit {

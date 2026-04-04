@@ -1,0 +1,57 @@
+ <p-card header="Profile Information">
+            <p-fluid>
+                <div class="flex flex-col gap-6">
+                    <!-- Full Name and Email -->
+                    <div class="flex flex-col md:flex-row gap-6">
+                        <div class="flex flex-col gap-2 w-full">
+                            <label for="fullName" class="font-bold text-surface-900">Full Name</label>
+                            <input pInputText id="fullName" [(ngModel)]="user.fullName" placeholder="Enter full name" />
+                        </div>
+                        <div class="flex flex-col gap-2 w-full">
+                            <label for="email" class="font-bold text-surface-900">Email</label>
+                            <input pInputText id="email" [(ngModel)]="user.email" [disabled]="true" placeholder="Enter email" />
+                        </div>
+                    </div>
+
+                    <!-- Gender and Birthday -->
+                    <div class="flex flex-col md:flex-row gap-6">
+                        <div class="flex flex-col gap-2 w-full">
+                            <label for="gender" class="font-bold text-surface-900">Gender</label>
+                            <p-select id="gender" [options]="genders" [(ngModel)]="user.gender" optionLabel="label" placeholder="Select Gender"></p-select>
+                        </div>
+                        <div class="flex flex-col gap-2 w-full">
+                            <label for="birthday" class="font-bold text-surface-900">Birthday</label>
+                            <p-datepicker id="birthday" [(ngModel)]="user.birthday" [showIcon]="true" placeholder="Select Date" (ngModelChange)="onBirthdayChange()"></p-datepicker>
+                            <small *ngIf="isBirthdayInvalid" class="text-red-500">Birthday must be in the past.</small>
+                        </div>
+                    </div>
+
+                    <hr class="border-surface-200 mt-2 mb-2" />
+                    <div class="font-semibold text-xl">Location Details</div>
+
+                    <!-- Country and City -->
+                    <div class="flex flex-col md:flex-row gap-6">
+                        <div class="flex flex-col gap-2 w-full">
+                            <label for="country" class="font-bold text-surface-900">Country</label>
+                            <p-select id="country" [options]="countries" [(ngModel)]="user.country" optionLabel="name" placeholder="Select Country"></p-select>
+                        </div>
+                        <div class="flex flex-col gap-2 w-full">
+                            <label for="city" class="font-bold text-surface-900">City</label>
+                            <p-select id="city" [options]="cities" [(ngModel)]="user.city" optionLabel="name" placeholder="Select City"></p-select>
+                        </div>
+                    </div>
+
+                    <!-- Street -->
+                    <div class="flex flex-col gap-2 w-full">
+                        <label for="street" class="font-bold text-surface-900">Street</label>
+                        <input pInputText id="street" [(ngModel)]="user.street" placeholder="Enter street address" />
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="flex justify-end mt-4">
+                        <p-button label="Back" icon="pi pi-arrow-left" (click)="onBack()" class="mr-2"></p-button>
+                        <p-button label="Save Changes" icon="pi pi-check" (click)="onSave()"></p-button>
+                    </div>
+                </div>
+            </p-fluid>
+        </p-card>

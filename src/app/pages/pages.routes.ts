@@ -4,7 +4,7 @@ import { roleGuard } from '../core/guards/role.guard';
 import { UserList } from './crud/user/list';
 import { UserCreate } from './crud/user/create';
 import { UserTrash } from './crud/user/trash';
-import { UserEdit } from './crud/user/edit';
+import { UserView } from './crud/user/view';
 
 export default [
     {
@@ -18,7 +18,8 @@ export default [
             { path: 'user/list', component: UserList },
             { path: 'user/create', component: UserCreate },
             { path: 'user/trash', component: UserTrash },
-            { path: 'user/edit/:id', component: UserEdit }
+            // { path: 'user/edit/:id', component: UserEdit },
+            { path: 'user/view/:id', component: UserView }
         ]
     },
 

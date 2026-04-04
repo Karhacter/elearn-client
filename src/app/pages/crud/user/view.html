@@ -1,0 +1,56 @@
+<p-toast></p-toast>
+<div class="flex flex-col md:flex-row gap-8">
+    <!-- Sidebar for Avatar -->
+    <div class="w-full md:w-1/3 xl:w-1/4">
+        <p-card>
+            <div class="flex flex-col items-center p-4">
+                <img [src]="avatarUrl" alt="User Avatar" class="w-32 h-32 rounded-full border-4 border-surface shadow-md object-cover mb-4" />
+                <div class="font-semibold text-xl mb-1">{{ user.fullName || 'User Name' }}</div>
+                <div class="text-surface-500 mb-6">{{ user.email || 'Email' }}</div>
+                <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/*" class="hidden" style="display: none;" />
+                <p-button label="Upload New Avatar" icon="pi pi-upload" severity="secondary" size="small" [fluid]="true" (click)="fileInput.click()"></p-button>
+            </div>
+
+            <ul class="list-none p-0 m-0 mt-4 border-t border-surface-200 pt-4">
+                <li *ngFor="let item of menuItems">
+                    <a
+                        pRipple
+                        class="flex items-center cursor-pointer p-4 rounded-md transition-colors duration-200"
+                        [ngClass]="{ 'bg-primary text-primary-contrast': currentTab === item.id, 'hover:bg-surface-100 text-surface-700': currentTab !== item.id }"
+                        (click)="setTab(item.id)"
+                    >
+                        <i class="mr-3 text-lg" [ngClass]="item.icon"></i>
+                        <span class="font-medium">{{ item.label }}</span>
+                    </a>
+                </li>
+            </ul>
+        </p-card>
+    </div>
+
+    <!-- Content Area -->
+    <div class="w-full md:w-2/3 xl:w-3/4">
+        <!-- Profile Tab -->
+        <div *ngIf="currentTab === 'profile'">
+            <app-profile-info 
+                [user]="user" 
+                [genders]="genders" 
+                [countries]="countries" 
+                [cities]="cities" 
+                [isBirthdayInvalid]="isBirthdayInvalid"
+                (birthdayChanged)="validateBirthday()"
+                (back)="back()"
+                (save)="saveUser()">
+            </app-profile-info>
+        </div>
+
+        <!-- Password Tab -->
+        <div *ngIf="currentTab === 'password'">
+            <app-change-password></app-change-password>
+        </div>
+
+        <!-- Chart Tab -->
+        <div *ngIf="currentTab === 'chart'">
+            <app-user-chart></app-user-chart>
+        </div>
+    </div>
+</div>

@@ -1,7 +1,8 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { AuthService } from './auth.service';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
+import { tap } from 'rxjs/operators';
 
 export interface User {
     userId?: number;
@@ -19,7 +20,6 @@ export interface User {
 export class UserService {
     private http = inject(HttpClient);
     private authService = inject(AuthService);
-    private authUrl = 'http://localhost:5263/api/Auth';
     private userUrl = 'http://localhost:5263/api/User';
 
     private getHeaders(): HttpHeaders {
@@ -31,8 +31,8 @@ export class UserService {
         return headers;
     }
 
-    getUsers(): Observable<{ data: User[] }> {
-        return this.http.get<{ data: User[] }>(`${this.authUrl}/users`, {
+    getUsers(page: number = 1, pageSize: number = 10): Observable<any> {
+        return this.http.get<any>(`${this.userUrl}?page=${page}&pageSize=${pageSize}`, {
             headers: this.getHeaders(),
             withCredentials: true
         });
@@ -43,6 +43,21 @@ export class UserService {
             headers: this.getHeaders(),
             withCredentials: true
         });
+    }
+
+    private cachedUser: User | null = null;
+
+    getCurrentUser(id: number): Observable<{ data: User }> {
+        if (this.cachedUser && this.cachedUser.userId === id) {
+            return of({ data: this.cachedUser });
+        }
+        return this.getUserById(id).pipe(
+            tap((res) => {
+                if (res && res.data) {
+                    this.cachedUser = res.data;
+                }
+            })
+        );
     }
 
     getUserById(id: number): Observable<{ data: User }> {
@@ -63,7 +78,13 @@ export class UserService {
         return this.http.put<any>(`${this.userUrl}/edit/${id}`, user, {
             headers: this.getHeaders(),
             withCredentials: true
-        });
+        }).pipe(
+            tap(() => {
+                if (this.cachedUser && this.cachedUser.userId === id) {
+                    this.cachedUser = { ...this.cachedUser, ...user };
+                }
+            })
+        );
     }
 
     deleteUser(id: number): Observable<any> {
@@ -75,10 +96,14 @@ export class UserService {
 
     // soft - detele
     softDeleteUser(id: number): Observable<any> {
-        return this.http.patch<any>(`${this.userUrl}/${id}/toggle-soft-delete`, {}, {
-            headers: this.getHeaders(),
-            withCredentials: true
-        });
+        return this.http.patch<any>(
+            `${this.userUrl}/${id}/toggle-soft-delete`,
+            {},
+            {
+                headers: this.getHeaders(),
+                withCredentials: true
+            }
+        );
     }
 
     updateUserImage(id: number, imageUrl: string): Observable<any> {
