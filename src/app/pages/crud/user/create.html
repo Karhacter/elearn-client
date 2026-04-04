@@ -82,6 +82,95 @@
                     </div>
                 </div>
 
+                <!-- ── Profile Details Section ── -->
+                <p-divider styleClass="my-8" />
+                <div class="font-semibold text-xl mb-6">Profile Details</div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                    <!-- Left: Gender + Birthday -->
+                    <div class="flex flex-col gap-10">
+
+                        <!-- Gender -->
+                        <div class="flex flex-col gap-3">
+                            <label for="gender" class="font-medium text-surface-900 dark:text-surface-0">Gender</label>
+                            <p-select
+                                id="gender"
+                                formControlName="gender"
+                                [options]="genders"
+                                optionLabel="label"
+                                optionValue="value"
+                                placeholder="Select gender"
+                                styleClass="w-full p-2 text-lg"
+                                [class.ng-invalid]="isFieldInvalid('gender')"
+                                [class.ng-dirty]="isFieldInvalid('gender')"
+                            />
+                            <small class="p-error" *ngIf="isFieldInvalid('gender')">Gender is required.</small>
+                        </div>
+
+                        <!-- Birthday -->
+                        <div class="flex flex-col gap-3">
+                            <label for="birthday" class="font-medium text-surface-900 dark:text-surface-0">Birthday</label>
+                            <p-datepicker
+                                id="birthday"
+                                formControlName="birthday"
+                                [showIcon]="true"
+                                dateFormat="dd/mm/yy"
+                                placeholder="DD/MM/YYYY"
+                                [maxDate]="maxBirthday"
+                                styleClass="w-full"
+                                inputStyleClass="w-full p-4 text-lg"
+                                [class.ng-invalid]="isFieldInvalid('birthday')"
+                                [class.ng-dirty]="isFieldInvalid('birthday')"
+                                appendTo="body"
+                            />
+                            <small class="p-error" *ngIf="isFieldInvalid('birthday') && userForm.get('birthday')?.errors?.['required']">Birthday is required.</small>
+                            <small class="p-error" *ngIf="isFieldInvalid('birthday') && userForm.get('birthday')?.errors?.['notInPast']">Birthday must be a date in the past.</small>
+                        </div>
+                    </div>
+
+                    <!-- Right: Location -->
+                    <div class="flex flex-col gap-10">
+
+                        <!-- Country -->
+                        <div class="flex flex-col gap-3">
+                            <label for="country" class="font-medium text-surface-900 dark:text-surface-0">Country</label>
+                            <p-select
+                                id="country"
+                                formControlName="country"
+                                [options]="countries"
+                                optionLabel="name"
+                                placeholder="Select country"
+                                styleClass="w-full p-2 text-lg"
+                                [class.ng-invalid]="isFieldInvalid('country')"
+                                [class.ng-dirty]="isFieldInvalid('country')"
+                            />
+                            <small class="p-error" *ngIf="isFieldInvalid('country')">Country is required.</small>
+                        </div>
+
+                        <!-- City (cascades from Country) -->
+                        <div class="flex flex-col gap-3">
+                            <label for="city" class="font-medium text-surface-900 dark:text-surface-0">City</label>
+                            <p-select
+                                id="city"
+                                formControlName="city"
+                                [options]="cities"
+                                optionLabel="name"
+                                placeholder="Select city"
+                                styleClass="w-full p-2 text-lg"
+                                [class.ng-invalid]="isFieldInvalid('city')"
+                                [class.ng-dirty]="isFieldInvalid('city')"
+                            />
+                            <small class="p-error" *ngIf="isFieldInvalid('city')">City is required.</small>
+                        </div>
+
+                        <!-- Street -->
+                        <div class="flex flex-col gap-3">
+                            <label for="street" class="font-medium text-surface-900 dark:text-surface-0">Street</label>
+                            <input pInputText id="street" formControlName="street" placeholder="Enter street address" class="p-4 text-lg w-full" />
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Footer Actions -->
                 <div class="flex justify-end gap-3 mt-12 border-t border-surface-200 dark:border-surface-700 pt-8">
                     <p-button label="Cancel" severity="secondary" text (onClick)="onCancel()" />

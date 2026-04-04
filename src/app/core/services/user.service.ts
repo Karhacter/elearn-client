@@ -75,16 +75,18 @@ export class UserService {
     }
 
     updateUser(id: number, user: any): Observable<any> {
-        return this.http.put<any>(`${this.userUrl}/edit/${id}`, user, {
-            headers: this.getHeaders(),
-            withCredentials: true
-        }).pipe(
-            tap(() => {
-                if (this.cachedUser && this.cachedUser.userId === id) {
-                    this.cachedUser = { ...this.cachedUser, ...user };
-                }
+        return this.http
+            .put<any>(`${this.userUrl}/edit/${id}`, user, {
+                headers: this.getHeaders(),
+                withCredentials: true
             })
-        );
+            .pipe(
+                tap(() => {
+                    if (this.cachedUser && this.cachedUser.userId === id) {
+                        this.cachedUser = { ...this.cachedUser, ...user };
+                    }
+                })
+            );
     }
 
     deleteUser(id: number): Observable<any> {
@@ -94,11 +96,22 @@ export class UserService {
         });
     }
 
-    // soft - detele
+    // soft - delete
     softDeleteUser(id: number): Observable<any> {
         return this.http.patch<any>(
             `${this.userUrl}/${id}/toggle-soft-delete`,
             {},
+            {
+                headers: this.getHeaders(),
+                withCredentials: true
+            }
+        );
+    }
+
+    bulkSoftDelete(ids: number[]): Observable<any> {
+        return this.http.post<any>(
+            `${this.userUrl}/bulk-soft-delete`,
+            { ids },
             {
                 headers: this.getHeaders(),
                 withCredentials: true

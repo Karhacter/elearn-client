@@ -5,6 +5,8 @@ import { UserList } from './crud/user/list';
 import { UserCreate } from './crud/user/create';
 import { UserTrash } from './crud/user/trash';
 import { UserView } from './crud/user/view';
+import { CategoryList } from './crud/category/list';
+import { CourseList } from './crud/course/list';
 
 export default [
     {
@@ -19,7 +21,13 @@ export default [
             { path: 'user/create', component: UserCreate },
             { path: 'user/trash', component: UserTrash },
             // { path: 'user/edit/:id', component: UserEdit },
-            { path: 'user/view/:id', component: UserView }
+            { path: 'user/view/:id', component: UserView },
+
+            // Category
+            { path: 'category/list', component: CategoryList },
+
+            // Course
+            { path: 'course/list', component: CourseList }
         ]
     },
 

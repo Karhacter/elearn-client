@@ -134,13 +134,26 @@ export class UserList implements OnInit {
 
     deleteSelectedUsers() {
         this.confirmationService.confirm({
-            message: 'Are you sure you want to delete the selected users?',
-            header: 'Confirm',
+            message: 'Are you sure you want to move the selected users to trash?',
+            header: 'Confirm Bulk Delete',
             icon: 'pi pi-exclamation-triangle',
             accept: () => {
-                this.users.set(this.users().filter((val) => !this.selectedUsers?.includes(val)));
-                this.selectedUsers = null;
-                this.messageService.add({ severity: 'success', summary: 'Successful', detail: 'Users Deleted (Local Only)', life: 3000 });
+                const ids = (this.selectedUsers ?? [])
+                    .map((u) => u.userId!)
+                    .filter((id) => id != null);
+
+                if (ids.length === 0) return;
+
+                this.userService.bulkSoftDelete(ids).subscribe({
+                    next: () => {
+                        this.selectedUsers = null;
+                        this.messageService.add({ severity: 'success', summary: 'Successful', detail: 'Selected users moved to trash', life: 3000 });
+                        this.loadUsers();
+                    },
+                    error: () => {
+                        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Could not delete selected users', life: 3000 });
+                    }
+                });
             }
         });
     }

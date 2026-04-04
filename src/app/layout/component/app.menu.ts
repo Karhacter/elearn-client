@@ -82,7 +82,7 @@ export class AppMenu implements OnInit {
                     {
                         label: 'Category',
                         icon: 'pi pi-fw pi-tag',
-                        routerLink: ['/crud/category']
+                        routerLink: ['pages/crud/category/list']
                     },
                     {
                         label: 'Lesson',

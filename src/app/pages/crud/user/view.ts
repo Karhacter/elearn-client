@@ -164,7 +164,9 @@ export class UserView implements OnInit {
             if (this.selectedAvatarFile) {
                 task$ = this.userService.uploadUserImage(Number(id), this.selectedAvatarFile).pipe(
                     switchMap((res) => {
-                        const newProfilePicture = res?.data?.profilePicture || res?.profilePicture || res?.imageUrl;
+                        const newProfilePicture = (typeof res?.data === 'string') 
+                            ? res.data 
+                            : (res?.data?.imageUrl || res?.data?.profilePicture || res?.imageUrl);
                         if (newProfilePicture) {
                             this.user.profilePicture = newProfilePicture;
                         }
@@ -203,6 +205,8 @@ export class UserView implements OnInit {
                 )
                 .subscribe({
                     next: () => {
+                        this.previewImage = null;
+                        this.selectedAvatarFile = null;
                         this.messageService.add({ severity: 'success', summary: 'Success', detail: 'User updated successfully!' });
                         setTimeout(() => this.back(), 1500);
                     },
