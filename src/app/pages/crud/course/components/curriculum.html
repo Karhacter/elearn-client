@@ -1,0 +1,65 @@
+<!-- curriculum.html -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
+    <!-- Learning Outcomes -->
+    <p-card class="h-full">
+        <ng-template pTemplate="header">
+            <div class="px-6 pt-6 flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                    <i class="pi pi-check-circle text-xl"></i>
+                </div>
+                <h3 class="m-0 font-bold text-xl">What You'll Learn</h3>
+            </div>
+        </ng-template>
+        <div class="flex flex-col gap-4">
+            <div *ngIf="!hasOutcomes" class="text-surface-500 italic text-center p-4">No learning outcomes listed.</div>
+            <ul *ngIf="hasOutcomes" class="list-none p-0 m-0 flex flex-col gap-3">
+                <li *ngFor="let item of course.learningOutcomes" class="flex gap-3">
+                    <i class="pi pi-check text-green-500 mt-1 shrink-0"></i>
+                    <span class="text-surface-600 dark:text-surface-300">{{ item }}</span>
+                </li>
+            </ul>
+        </div>
+    </p-card>
+
+    <!-- Requirements -->
+    <p-card class="h-full">
+        <ng-template pTemplate="header">
+            <div class="px-6 pt-6 flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-orange-600 dark:text-orange-400">
+                    <i class="pi pi-list text-xl"></i>
+                </div>
+                <h3 class="m-0 font-bold text-xl">Requirements</h3>
+            </div>
+        </ng-template>
+        <div class="flex flex-col gap-4">
+            <div *ngIf="!hasRequirements" class="text-surface-500 italic text-center p-4">No requirements listed.</div>
+            <ul *ngIf="hasRequirements" class="list-none p-0 m-0 flex flex-col gap-3">
+                <li *ngFor="let item of course.requirements" class="flex gap-3">
+                    <i class="pi pi-info-circle text-orange-500 mt-1 shrink-0"></i>
+                    <span class="text-surface-600 dark:text-surface-300">{{ item }}</span>
+                </li>
+            </ul>
+        </div>
+    </p-card>
+
+    <!-- Target Audience -->
+    <p-card class="h-full">
+        <ng-template pTemplate="header">
+            <div class="px-6 pt-6 flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 dark:text-purple-400">
+                    <i class="pi pi-users text-xl"></i>
+                </div>
+                <h3 class="m-0 font-bold text-xl">Target Audience</h3>
+            </div>
+        </ng-template>
+        <div class="flex flex-col gap-4">
+            <div *ngIf="!hasAudiences" class="text-surface-500 italic text-center p-4">No target audience listed.</div>
+            <ul *ngIf="hasAudiences" class="list-none p-0 m-0 flex flex-col gap-3">
+                <li *ngFor="let item of course.targetAudiences" class="flex gap-3">
+                    <i class="pi pi-user text-purple-500 mt-1 shrink-0"></i>
+                    <span class="text-surface-600 dark:text-surface-300">{{ item }}</span>
+                </li>
+            </ul>
+        </div>
+    </p-card>
+</div>

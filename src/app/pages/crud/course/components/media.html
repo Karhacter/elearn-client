@@ -1,0 +1,41 @@
+<!-- media.html -->
+<p-card class="mt-8 mb-8">
+    <div class="flex items-center gap-3 mb-6">
+        <div class="w-10 h-10 rounded-full bg-surface-100 dark:bg-surface-900 flex items-center justify-center">
+            <i class="pi pi-image text-xl"></i>
+        </div>
+        <h3 class="m-0 font-bold text-xl uppercase tracking-widest text-surface-500">Visual Assets</h3>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <!-- Thumbnail Section -->
+        <div class="flex flex-col gap-4">
+            <span class="font-semibold text-surface-700 dark:text-surface-200">Thumbnail Preview</span>
+            <div class="relative group overflow-hidden rounded-xl border border-surface-200 dark:border-surface-800 bg-surface-100 dark:bg-surface-900 aspect-video flex items-center justify-center">
+                <p-image 
+                    [src]="getThumbnailUrl(course.thumbnail)" 
+                    alt="Course Thumbnail" 
+                    width="100%"
+                    [preview]="true"
+                    imageClass="max-h-[300px] object-contain transition-transform duration-500 group-hover:scale-105"
+                />
+            </div>
+            <p class="text-sm text-surface-500 m-0">This thumbnail appears in course listings and search results.</p>
+        </div>
+
+        <!-- Main Image Section -->
+        <div class="flex flex-col gap-4">
+            <span class="font-semibold text-surface-700 dark:text-surface-200">Hero Image Preview</span>
+            <div class="relative group overflow-hidden rounded-xl border border-surface-200 dark:border-surface-800 bg-surface-100 dark:bg-surface-900 aspect-video flex items-center justify-center">
+                <p-image 
+                    [src]="getCourseImageUrl(course.image)" 
+                    alt="Course Hero Image" 
+                    width="100%"
+                    [preview]="true"
+                    imageClass="max-h-[300px] object-contain transition-transform duration-500 group-hover:scale-105"
+                />
+            </div>
+            <p class="text-sm text-surface-500 m-0">This high-resolution image is shown on the course detail page for students.</p>
+        </div>
+    </div>
+</p-card>

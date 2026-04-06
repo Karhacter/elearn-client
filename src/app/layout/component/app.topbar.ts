@@ -1,4 +1,5 @@
-import { Component, computed, inject, input, OnInit } from '@angular/core';
+import { Component, computed, inject, input, OnInit, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { MenuItem } from 'primeng/api';
 import { RouterModule, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -65,7 +66,7 @@ import { LayoutService } from '@/app/layout/service/layout.service';
                         <span>Messages</span>
                     </button>
                     <button type="button" class="layout-topbar-action" (click)="profileMenu.toggle($event)">
-                        <i class="pi pi-user"></i>
+                        <img [src]="getProfilePictureUrl()" alt="Profile" class="w-8 h-8 rounded-full object-cover shadow-sm border border-surface-200" />
                         <span>Profile</span>
                     </button>
                     <p-menu #profileMenu [model]="profileMenuItems" [popup]="true"></p-menu>
@@ -82,9 +83,7 @@ export class AppTopbar implements OnInit {
     authService = inject(AuthService);
     router = inject(Router);
 
-    float = input<boolean>(true);
-
-    isDarkTheme = computed(() => this.layoutService.layoutConfig().darkTheme);
+    authUser = toSignal(this.authService.authUser$);
 
     ngOnInit() {
         if (typeof window !== 'undefined') {
@@ -95,25 +94,46 @@ export class AppTopbar implements OnInit {
             }
         }
 
-        // Setup default menu then fetch actual username
-        this.updateProfileMenu('User');
+        // Setup menu based on auth user
+        const user = this.authUser();
+        this.updateProfileMenu(user?.name || 'User', user?.userId);
 
         this.authService.checkAuth().subscribe({
             next: (response) => {
-                const user = response.data?.user || response.data;
-                const name = (user as any)?.name || (user as any)?.fullName || 'User';
-                this.updateProfileMenu(name);
+                const userData = response.data?.user || response.data;
+                const name = (userData as any)?.fullName || (userData as any)?.name || 'User';
+                const id = (userData as any)?.userId;
+                this.updateProfileMenu(name, String(id));
             },
             error: () => this.updateProfileMenu('User')
         });
     }
 
-    private updateProfileMenu(name: string) {
+    getProfilePictureUrl() {
+        const user = this.authUser();
+        const path = user?.profilePicture;
+
+        if (!path) {
+            return 'https://primefaces.org/cdn/primeng/images/demo/avatar/amyelsner.png';
+        }
+
+        if (path.startsWith('http')) {
+            return path;
+        }
+
+        return `http://localhost:5263/${path}`;
+
+        // return 'https://primefaces.org/cdn/primeng/images/demo/avatar/amyelsner.png';
+        
+    }
+
+    private updateProfileMenu(name: string, userId?: string) {
         this.profileMenuItems = [
             {
                 label: `Hello, ${name}`,
                 icon: 'pi pi-user',
-                styleClass: 'font-bold'
+                styleClass: 'font-bold',
+                routerLink: userId ? [`/pages/crud/user/view`, userId] : undefined
             },
             {
                 label: 'Settings',

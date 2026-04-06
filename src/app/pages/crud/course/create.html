@@ -1,0 +1,187 @@
+<!-- create.html -->
+<p-toast></p-toast>
+
+<div *ngIf="loading" class="flex justify-center items-center h-[50vh]">
+    <p-progressspinner ariaLabel="loading" />
+</div>
+
+<div *ngIf="!loading" class="animate-fade-in">
+    <div class="flex items-center justify-between mb-8">
+        <h2 class="text-3xl font-bold m-0 flex items-center gap-3">
+            <i class="pi pi-plus-circle text-primary"></i>
+            Create New Course
+        </h2>
+        <div class="flex gap-2">
+            <p-button label="Cancel" icon="pi pi-times" severity="secondary" (onClick)="onCancel()" [disabled]="isSubmitting" />
+            <p-button label="Create Course" icon="pi pi-check" (onClick)="onSubmit()" [loading]="isSubmitting" />
+        </div>
+    </div>
+
+    <form [formGroup]="courseForm">
+        <div class="grid grid-cols-12 gap-8">
+            <!-- Left Column: Core Details -->
+            <div class="col-span-12 xl:col-span-8 flex flex-col gap-8">
+                <p-card header="General Information">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="flex flex-col gap-2 col-span-2">
+                            <label for="title" class="font-semibold">Course Title <span class="text-red-500">*</span></label>
+                            <input pInputText id="title" formControlName="title" placeholder="e.g. Advanced Angular Development" 
+                                   [class.ng-invalid]="isFieldInvalid('title')" [class.ng-dirty]="isFieldInvalid('title')">
+                            <small class="text-red-500" *ngIf="isFieldInvalid('title')">Title is required (max 150 chars).</small>
+                        </div>
+
+                        <div class="flex flex-col gap-2 col-span-2">
+                            <label for="description" class="font-semibold">Description <span class="text-red-500">*</span></label>
+                            <textarea pTextarea id="description" formControlName="description" rows="5" autoResize
+                                      placeholder="Provide a detailed description of the course content and goals..."
+                                      [class.ng-invalid]="isFieldInvalid('description')" [class.ng-dirty]="isFieldInvalid('description')"></textarea>
+                            <small class="text-red-500" *ngIf="isFieldInvalid('description')">Description must be at least 20 characters.</small>
+                        </div>
+
+                        <div class="flex flex-col gap-2">
+                            <label for="slug" class="font-semibold">Custom Slug</label>
+                            <input pInputText id="slug" formControlName="slug" placeholder="e.g. advanced-angular-course">
+                            <small class="text-surface-500">Leave empty to auto-generate from title.</small>
+                        </div>
+
+                        <div class="flex flex-col gap-2">
+                            <label for="duration" class="font-semibold">Duration (Minutes) <span class="text-red-500">*</span></label>
+                            <p-inputnumber id="duration" formControlName="duration" [min]="10" [max]="10000" suffix=" mins" showButtons></p-inputnumber>
+                        </div>
+                    </div>
+                </p-card>
+
+                <!-- Curriculum Sections -->
+                <p-card header="Course Curriculum Highlights">
+                    <div class="flex flex-col gap-8">
+                        <!-- Learning Outcomes -->
+                        <div class="flex flex-col gap-4">
+                            <div class="flex items-center justify-between">
+                                <span class="font-semibold text-lg flex items-center gap-2">
+                                    <i class="pi pi-check-circle text-green-500"></i> What You'll Learn
+                                </span>
+                                <p-button icon="pi pi-plus" size="small" rounded severity="success" (onClick)="addListItem(learningOutcomes)" />
+                            </div>
+                            <div formArrayName="learningOutcomes" class="flex flex-col gap-3">
+                                <div *ngFor="let outcome of learningOutcomes.controls; let i=index" class="flex gap-2">
+                                    <input pInputText [formControlName]="i" class="flex-1" placeholder="e.g. Master reactive programming with RxJS">
+                                    <p-button icon="pi pi-trash" severity="danger" text (onClick)="removeListItem(learningOutcomes, i)" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <p-divider></p-divider>
+
+                        <!-- Requirements -->
+                        <div class="flex flex-col gap-4">
+                            <div class="flex items-center justify-between">
+                                <span class="font-semibold text-lg flex items-center gap-2">
+                                    <i class="pi pi-list text-blue-500"></i> Requirements
+                                </span>
+                                <p-button icon="pi pi-plus" size="small" rounded severity="info" (onClick)="addListItem(requirements)" />
+                            </div>
+                            <div formArrayName="requirements" class="flex flex-col gap-3">
+                                <div *ngFor="let req of requirements.controls; let i=index" class="flex gap-2">
+                                    <input pInputText [formControlName]="i" class="flex-1" placeholder="e.g. Basic knowledge of JavaScript/TypeScript">
+                                    <p-button icon="pi pi-trash" severity="danger" text (onClick)="removeListItem(requirements, i)" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <p-divider></p-divider>
+
+                        <!-- Target Audience -->
+                        <div class="flex flex-col gap-4">
+                            <div class="flex items-center justify-between">
+                                <span class="font-semibold text-lg flex items-center gap-2">
+                                    <i class="pi pi-users text-purple-500"></i> Target Audience
+                                </span>
+                                <p-button icon="pi pi-plus" size="small" rounded severity="help" (onClick)="addListItem(targetAudiences)" />
+                            </div>
+                            <div formArrayName="targetAudiences" class="flex flex-col gap-3">
+                                <div *ngFor="let audience of targetAudiences.controls; let i=index" class="flex gap-2">
+                                    <input pInputText [formControlName]="i" class="flex-1" placeholder="e.g. Web developers looking to scale their Angular apps">
+                                    <p-button icon="pi pi-trash" severity="danger" text (onClick)="removeListItem(targetAudiences, i)" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </p-card>
+            </div>
+
+            <!-- Right Column: Settings, Pricing & Media -->
+            <div class="col-span-12 xl:col-span-4 flex flex-col gap-8">
+                <!-- Administrative Settings -->
+                <p-card header="Administration">
+                    <div class="flex flex-col gap-6">
+                        <div class="flex flex-col gap-2">
+                            <label for="instructorId" class="font-semibold">Instructor <span class="text-red-500">*</span></label>
+                            <p-select id="instructorId" formControlName="instructorId" [options]="instructors" 
+                                      placeholder="Assign an instructor" filter filterBy="label"
+                                      [class.ng-invalid]="isFieldInvalid('instructorId')"></p-select>
+                        </div>
+
+                        <div class="flex flex-col gap-2">
+                            <label for="genreId" class="font-semibold">Genre/Category <span class="text-red-500">*</span></label>
+                            <p-select id="genreId" formControlName="genreId" [options]="genres" 
+                                      placeholder="Select a category" filter filterBy="label"
+                                      [class.ng-invalid]="isFieldInvalid('genreId')"></p-select>
+                        </div>
+
+                        <div class="flex flex-col gap-2">
+                            <label for="status" class="font-semibold">Status <span class="text-red-500">*</span></label>
+                            <p-select id="status" formControlName="status" [options]="statuses" placeholder="Select visibility status"></p-select>
+                        </div>
+
+                        <div class="flex items-center justify-between py-2 px-1 rounded-lg bg-surface-50 dark:bg-surface-900">
+                            <div class="flex flex-col">
+                                <span class="font-semibold">Sequential Progress</span>
+                                <small class="text-surface-500">Force students to finish lessons in order.</small>
+                            </div>
+                            <p-toggleswitch formControlName="isSequential"></p-toggleswitch>
+                        </div>
+                    </div>
+                </p-card>
+
+                <!-- Pricing -->
+                <p-card header="Pricing">
+                    <div class="flex flex-col gap-6">
+                        <div class="flex flex-col gap-2">
+                            <label for="price" class="font-semibold">Base Price ($)</label>
+                            <p-inputnumber id="price" formControlName="price" mode="currency" currency="USD" locale="en-US"></p-inputnumber>
+                        </div>
+
+                        <div class="flex flex-col gap-2">
+                            <label for="discount" class="font-semibold">Discount ($)</label>
+                            <p-inputnumber id="discount" formControlName="discount" mode="currency" currency="USD" locale="en-US"></p-inputnumber>
+                        </div>
+
+                        <div class="p-4 bg-primary-50 dark:bg-primary-900/20 rounded-xl border border-primary-100 dark:border-primary-800 flex justify-between items-center">
+                            <span class="font-bold text-primary">Final Price:</span>
+                            <span class="text-2xl font-black text-primary">
+                                {{ (courseForm.get('price')?.value || 0) - (courseForm.get('discount')?.value || 0) | currency:'USD' }}
+                            </span>
+                        </div>
+                    </div>
+                </p-card>
+
+                <!-- Media Assets -->
+                <p-card header="Visual Assets">
+                    <div class="flex flex-col gap-6">
+                        <div class="flex flex-col gap-2">
+                            <label for="thumbnail" class="font-semibold">Thumbnail URL</label>
+                            <input pInputText id="thumbnail" formControlName="thumbnail" placeholder="https://example.com/thumb.jpg">
+                        </div>
+
+                        <div class="flex flex-col gap-2">
+                            <label for="image" class="font-semibold">Main Image URL</label>
+                            <input pInputText id="image" formControlName="image" placeholder="https://example.com/hero.jpg">
+                        </div>
+
+                        <p class="text-sm text-surface-500 italic m-0">Images will be used in course listings and on pages. URLs must be valid.</p>
+                    </div>
+                </p-card>
+            </div>
+        </div>
+    </form>
+</div>

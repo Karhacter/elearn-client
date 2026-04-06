@@ -4,20 +4,20 @@
 <p-toolbar styleClass="mb-6">
     <ng-template #start>
         <p-button
-            label="New Course"
+            label="Restore Selected"
             icon="pi pi-plus"
             severity="secondary"
             class="mr-2"
-            (onClick)="openNew()"
+            (onClick)="RestoreSelected()"
         />
-        <p-button
+        <!-- <p-button
             severity="secondary"
             label="Delete"
             icon="pi pi-trash"
             outlined
             (onClick)="deleteSelectedCourses()"
             [disabled]="!selectedCourses || !selectedCourses.length"
-        />
+        /> -->
     </ng-template>
 
     <ng-template #end>
@@ -53,7 +53,7 @@
     <!-- Caption / search bar -->
     <ng-template pTemplate="caption">
         <div class="flex items-center justify-between flex-wrap gap-3">
-            <h5 class="m-0">Manage Courses</h5>
+            <h5 class="m-0">Course Trash</h5>
             <p-iconfield>
                 <p-inputicon styleClass="pi pi-search" />
                 <input
@@ -61,7 +61,7 @@
                     type="text"
                     #searchInput
                     (input)="onGlobalFilter(dt, $event)"
-                    placeholder="Search courses…"
+                    placeholder="Search trash…"
                     class="w-full sm:w-auto"
                 />
             </p-iconfield>
@@ -188,31 +188,13 @@
             <td>
                 <div class="flex gap-1">
                     <p-button
-                        icon="pi pi-eye"
+                        icon="pi pi-refresh"
                         severity="info"
                         [rounded]="true"
                         [outlined]="true"
-                        pTooltip="View"
+                        pTooltip="Restore"
                         tooltipPosition="top"
-                        (click)="viewCourse(course)"
-                    />
-                        <p-button
-                        icon="pi pi-pencil"
-                        severity="secondary"
-                        [rounded]="true"
-                        [outlined]="true"
-                        pTooltip="Edit"
-                        tooltipPosition="top"
-                        (click)="viewEdit(course)"
-                    />
-                    <p-button
-                        icon="pi pi-trash"
-                        severity="danger"
-                        [rounded]="true"
-                        [outlined]="true"
-                        pTooltip="Delete"
-                        tooltipPosition="top"
-                        (click)="softDeleteCourse(course)"
+                        (click)="RestoreCourse(course)"
                     />
                 </div>
             </td>
@@ -224,9 +206,8 @@
         <tr>
             <td colspan="10">
                 <div class="flex flex-col items-center justify-center py-12 gap-3 text-surface-400">
-                    <i class="pi pi-book" style="font-size: 3rem; opacity: 0.3;"></i>
-                    <span class="text-lg">No courses found</span>
-                    <p-button label="Create your first course" icon="pi pi-plus" severity="secondary" (onClick)="openNew()" />
+                    <i class="pi pi-trash" style="font-size: 3rem; opacity: 0.3;"></i>
+                    <span class="text-lg">Trash is empty</span>
                 </div>
             </td>
         </tr>
