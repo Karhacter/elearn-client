@@ -13,6 +13,8 @@ import { CourseView } from './crud/course/view';
 import { CourseEdit } from './crud/course/edit';
 import { SectionList } from './crud/section/list';
 import { SectionListDetail } from './crud/section/section-list';
+import { SectionTrash } from './crud/section/trash';
+import { CreateLesson } from './crud/section/component/create-lesson';
 
 export default [
     {
@@ -52,7 +54,8 @@ export default [
         data: { roles: ['ADMIN'] },
         children: [
             { path: 'course/:courseId/section/list', component: SectionListDetail },
-            { path: 'course/section/list', component: SectionList }
+            { path: 'course/section/list', component: SectionList },
+            { path: 'course/:courseId/section/trash', component: SectionTrash },
         ]
     },
 

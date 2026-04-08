@@ -1,0 +1,40 @@
+<p-card header="Create Lesson">
+    <form [formGroup]="lessonForm" class="flex flex-col gap-5" (ngSubmit)="submit()">
+        <div class="flex flex-col gap-2">
+            <label for="title" class="font-semibold">Title <span class="text-red-500">*</span></label>
+            <input id="title" type="text" pInputText formControlName="title" maxlength="100" placeholder="Enter lesson title" />
+            <small class="text-red-500" *ngIf="isInvalid('title') && lessonForm.get('title')?.errors?.['required']">Title is required.</small>
+            <small class="text-red-500" *ngIf="isInvalid('title') && lessonForm.get('title')?.errors?.['maxlength']">Title must be at most 100 characters.</small>
+        </div>
+
+        <div class="flex flex-col gap-2">
+            <label for="type" class="font-semibold">Type <span class="text-red-500">*</span></label>
+            <p-select id="type" formControlName="type" [options]="lessonTypes" optionLabel="label" optionValue="value" placeholder="Select lesson type"></p-select>
+        </div>
+
+        <div class="flex flex-col gap-2">
+            <label for="contentUrl" class="font-semibold">Content URL</label>
+            <input id="contentUrl" type="url" pInputText formControlName="contentUrl" placeholder="https://example.com/lesson-content" />
+            <small class="text-red-500" *ngIf="isInvalid('contentUrl') && lessonForm.get('contentUrl')?.errors?.['invalidUrl']">Content URL must be a valid URL.</small>
+        </div>
+
+        <div class="flex flex-col gap-2">
+            <label for="duration" class="font-semibold">Duration (minutes) <span class="text-red-500">*</span></label>
+            <p-inputnumber id="duration" formControlName="duration" [min]="1" [max]="1000" [showButtons]="true"></p-inputnumber>
+            <small class="text-red-500" *ngIf="isInvalid('duration') && lessonForm.get('duration')?.errors?.['required']">Duration is required.</small>
+            <small class="text-red-500" *ngIf="isInvalid('duration') && (lessonForm.get('duration')?.errors?.['min'] || lessonForm.get('duration')?.errors?.['max'])">
+                Duration must be between 1 and 1000.
+            </small>
+        </div>
+
+        <div class="flex flex-col gap-2">
+            <label for="order" class="font-semibold">Order</label>
+            <p-inputnumber id="order" formControlName="order" [showButtons]="true"></p-inputnumber>
+        </div>
+
+        <div class="flex justify-end gap-2">
+            <p-button type="button" label="Cancel" icon="pi pi-times" severity="secondary" text [disabled]="submitting" (onClick)="cancel.emit()"></p-button>
+            <p-button type="submit" label="Create Lesson" icon="pi pi-check" [loading]="submitting" [disabled]="submitting"></p-button>
+        </div>
+    </form>
+</p-card>

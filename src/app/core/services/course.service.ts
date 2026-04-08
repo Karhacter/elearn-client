@@ -1,6 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { AuthService } from './auth.service';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface CourseResponse {
@@ -45,22 +44,11 @@ export type Course = CourseResponse;
 })
 export class CourseService {
     private http = inject(HttpClient);
-    private authService = inject(AuthService);
     private courseUrl = 'http://localhost:5263/api/Course';
-
-    private getHeaders(): HttpHeaders {
-        const token = this.authService.getCookie('accessToken');
-        let headers = new HttpHeaders();
-        if (token) {
-            headers = headers.set('Authorization', `Bearer ${token}`);
-        }
-        return headers;
-    }
 
     getCourses(page: number = 1, pageSize: number = 10): Observable<ApiResponse<PagedResult<CourseResponse>>> {
         const params = new HttpParams().set('page', page.toString()).set('pageSize', pageSize.toString());
         return this.http.get<ApiResponse<PagedResult<CourseResponse>>>(this.courseUrl, {
-            headers: this.getHeaders(),
             params,
             withCredentials: true
         });
@@ -69,7 +57,6 @@ export class CourseService {
     getDeletedCourses(page: number = 1, pageSize: number = 10): Observable<ApiResponse<PagedResult<CourseResponse>>> {
         const params = new HttpParams().set('page', page.toString()).set('pageSize', pageSize.toString());
         return this.http.get<ApiResponse<PagedResult<CourseResponse>>>(`${this.courseUrl}/deleted`, {
-            headers: this.getHeaders(),
             params,
             withCredentials: true
         });
@@ -77,7 +64,6 @@ export class CourseService {
 
     getCourseById(id: number): Observable<ApiResponse<CourseResponse>> {
         return this.http.get<ApiResponse<CourseResponse>>(`${this.courseUrl}/detail/${id}`, {
-            headers: this.getHeaders(),
             withCredentials: true
         });
     }
@@ -87,7 +73,6 @@ export class CourseService {
             `${this.courseUrl}/${id}/toggle-soft-delete`,
             {},
             {
-                headers: this.getHeaders(),
                 withCredentials: true
             }
         );
@@ -98,7 +83,6 @@ export class CourseService {
             `${this.courseUrl}/bulk-soft-delete`,
             { ids, restore },
             {
-                headers: this.getHeaders(),
                 withCredentials: true
             }
         );
@@ -106,14 +90,12 @@ export class CourseService {
 
     createCourse(course: any): Observable<any> {
         return this.http.post<any>(`${this.courseUrl}/add`, course, {
-            headers: this.getHeaders(),
             withCredentials: true
         });
     }
 
     updateCourse(id: number, course: any): Observable<any> {
         return this.http.put<any>(`${this.courseUrl}/edit/${id}`, course, {
-            headers: this.getHeaders(),
             withCredentials: true
         });
     }

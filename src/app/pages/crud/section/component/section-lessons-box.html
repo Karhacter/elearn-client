@@ -1,0 +1,41 @@
+<div class="mx-3 my-3 overflow-hidden">
+    <div *ngIf="isLoading" class="px-4 py-3 flex items-center gap-2 text-surface-600">
+        <i class="pi pi-spin pi-spinner"></i>
+        <span>Loading lessons...</span>
+    </div>
+
+    <div *ngIf="!isLoading">
+        <div *ngIf="lessons.length === 0" class="px-4 py-3 text-sm text-surface-500">No lessons in this section.</div>
+
+        <p-table
+            *ngIf="lessons.length > 0"
+            [value]="lessons"
+            dataKey="id"
+            [(selection)]="selectedLessons"
+            styleClass="p-datatable-sm"
+            [tableStyle]="{ 'min-width': '100%' }"
+        >
+            <ng-template pTemplate="header">
+                <tr>
+                    <th style="width: 3rem">
+                        <p-tableHeaderCheckbox />
+                    </th>
+                    <th class="text-left">Lesson Title</th>
+                    <th class="text-left w-40">Type</th>
+                    <th class="text-left w-32">Duration</th>
+                </tr>
+            </ng-template>
+
+            <ng-template pTemplate="body" let-lesson>
+                <tr>
+                    <td>
+                        <p-tableCheckbox [value]="lesson" />
+                    </td>
+                    <td>{{ lesson.title }}</td>
+                    <td>{{ lesson.type || '-' }}</td>
+                    <td>{{ formatDuration(lesson.duration) }}</td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </div>
+</div>

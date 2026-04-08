@@ -22,6 +22,9 @@ import { SectionService, Section } from '@/app/core/services/section.service';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CourseService, CourseResponse } from '@/app/core/services/course.service';
 import { TooltipModule } from 'primeng/tooltip';
+import { Lesson, LessonService } from '@/app/core/services/lesson.service';
+import { SectionLessonsBoxComponent } from './component/section-lessons-box';
+import { CreateLesson, CreateLessonPayload } from './component/create-lesson';
 
 interface Column {
     field: string;
@@ -57,7 +60,9 @@ interface ExportColumn {
         IconFieldModule,
         ConfirmDialogModule,
         RouterLink,
-        TooltipModule
+        TooltipModule,
+        SectionLessonsBoxComponent,
+        CreateLesson
     ],
     templateUrl: './section-list.html',
     providers: [MessageService, ConfirmationService]
@@ -66,6 +71,7 @@ export class SectionListDetail implements OnInit {
     private route = inject(ActivatedRoute);
     private courseService = inject(CourseService);
     private sectionService = inject(SectionService);
+    private lessonService = inject(LessonService);
     private messageService = inject(MessageService);
     private confirmationService = inject(ConfirmationService);
 
@@ -76,6 +82,13 @@ export class SectionListDetail implements OnInit {
 
     sectionDialog: boolean = false;
     sections = signal<Section[]>([]);
+    sectionLessons = signal<Record<number, Lesson[]>>({});
+    loadedSectionIds = signal<Set<number>>(new Set<number>());
+    loadingSectionIds = signal<Set<number>>(new Set<number>());
+    expandedSectionId: number | null = null;
+    lessonDialog = false;
+    activeSectionForLesson: Section | null = null;
+    creatingLesson = false;
     section: Section = {};
     selectedSections!: Section[] | null;
     submitted: boolean = false;
@@ -114,14 +127,241 @@ export class SectionListDetail implements OnInit {
         this.sectionService.getSections(this.courseId).subscribe({
             next: (response: any) => {
                 const items = response.data ? response.data : response;
-                const mappedItems = Array.isArray(items) ? items.map((s: any) => ({
-                    ...s,
-                    id: s.sectionId || s.id // Map sectionId to id
-                })) : [];
+                const mappedItems = Array.isArray(items)
+                    ? items.map((s: any) => ({
+                          ...s,
+                          id: s.sectionId || s.id // Map sectionId to id
+                      }))
+                    : [];
                 this.sections.set(mappedItems);
             },
             error: () => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to load sections', life: 3000 })
         });
+    }
+
+    toggleSectionLessons(section: Section): void {
+        const sectionId = section.id;
+        if (!sectionId) {
+            return;
+        }
+
+        if (this.expandedSectionId === sectionId) {
+            this.expandedSectionId = null;
+            return;
+        }
+
+        this.expandedSectionId = sectionId;
+
+        this.fetchLessons(sectionId);
+    }
+
+    openCreateLesson(section: Section): void {
+        this.activeSectionForLesson = section;
+        this.lessonDialog = true;
+    }
+
+    softDeleteSection(section: Section): void {
+        const sectionId = section.id;
+        if (!sectionId) {
+            return;
+        }
+
+        this.confirmationService.confirm({
+            message: `Are you sure you want to move section "${section.title ?? sectionId}" to trash?`,
+            header: 'Confirm',
+            icon: 'pi pi-exclamation-triangle',
+            accept: () => {
+                this.sectionService.softDeleteSection(this.courseId, sectionId).subscribe({
+                    next: () => {
+                        this.sections.update((items) => items.filter((item) => item.id !== sectionId));
+
+                        if (this.expandedSectionId === sectionId) {
+                            this.expandedSectionId = null;
+                        }
+
+                        this.sectionLessons.update((state) => {
+                            const next = { ...state };
+                            delete next[sectionId];
+                            return next;
+                        });
+
+                        this.loadedSectionIds.update((state) => {
+                            const next = new Set(state);
+                            next.delete(sectionId);
+                            return next;
+                        });
+
+                        this.loadingSectionIds.update((state) => {
+                            const next = new Set(state);
+                            next.delete(sectionId);
+                            return next;
+                        });
+
+                        this.messageService.add({
+                            severity: 'success',
+                            summary: 'Successful',
+                            detail: 'Section moved to trash',
+                            life: 3000
+                        });
+                    },
+                    error: () => {
+                        this.messageService.add({
+                            severity: 'error',
+                            summary: 'Error',
+                            detail: 'Failed to soft delete section',
+                            life: 3000
+                        });
+                    }
+                });
+            }
+        });
+    }
+
+    closeCreateLessonDialog(): void {
+        this.lessonDialog = false;
+        this.creatingLesson = false;
+        this.activeSectionForLesson = null;
+    }
+
+    createLesson(payload: CreateLessonPayload): void {
+        const sectionId = this.activeSectionForLesson?.id;
+        if (!sectionId) {
+            return;
+        }
+
+        this.creatingLesson = true;
+        this.lessonService
+            .createLesson(sectionId, {
+                title: payload.title,
+                type: payload.type,
+                contentUrl: payload.contentUrl,
+                duration: payload.duration,
+                order: payload.order
+            })
+            .subscribe({
+                next: (response: any) => {
+                    this.creatingLesson = false;
+                    this.lessonDialog = false;
+                    this.expandedSectionId = sectionId;
+
+                    const created = this.mapLessonResponse(response?.data ?? response);
+                    if (created) {
+                        const current = this.sectionLessons()[sectionId] ?? [];
+                        this.sectionLessons.update((state) => ({
+                            ...state,
+                            [sectionId]: [...current, created].sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+                        }));
+                        this.loadedSectionIds.update((state) => {
+                            const next = new Set(state);
+                            next.add(sectionId);
+                            return next;
+                        });
+                    } else {
+                        this.fetchLessons(sectionId, true);
+                    }
+
+                    this.messageService.add({
+                        severity: 'success',
+                        summary: 'Successful',
+                        detail: 'Lesson created successfully',
+                        life: 3000
+                    });
+                    this.activeSectionForLesson = null;
+                },
+                error: () => {
+                    this.creatingLesson = false;
+                    this.messageService.add({
+                        severity: 'error',
+                        summary: 'Error',
+                        detail: 'Failed to create lesson',
+                        life: 3000
+                    });
+                }
+            });
+    }
+
+    getLessonsBySection(sectionId?: number): Lesson[] {
+        if (!sectionId) {
+            return [];
+        }
+        return this.sectionLessons()[sectionId] ?? [];
+    }
+
+    isSectionLoading(sectionId?: number): boolean {
+        return !!sectionId && this.loadingSectionIds().has(sectionId);
+    }
+
+    getExpandedSectionTitle(): string {
+        const sectionId = this.expandedSectionId;
+        if (!sectionId) {
+            return '';
+        }
+        return this.sections().find((section) => section.id === sectionId)?.title ?? `Section ${sectionId}`;
+    }
+
+    private fetchLessons(sectionId: number, force = false): void {
+        if (!force && (this.loadedSectionIds().has(sectionId) || this.loadingSectionIds().has(sectionId))) {
+            return;
+        }
+
+        this.loadingSectionIds.update((state) => {
+            const next = new Set(state);
+            next.add(sectionId);
+            return next;
+        });
+
+        this.lessonService.getLessons(sectionId).subscribe({
+            next: (response: any) => {
+                const payload = response?.data ?? response;
+                const items = payload?.items ?? payload ?? [];
+                const mapped = Array.isArray(items) ? items.map((lesson: any) => this.mapLessonResponse(lesson)).filter((lesson): lesson is Lesson => !!lesson) : [];
+
+                this.sectionLessons.update((state) => ({
+                    ...state,
+                    [sectionId]: mapped
+                }));
+
+                this.loadedSectionIds.update((state) => {
+                    const next = new Set(state);
+                    next.add(sectionId);
+                    return next;
+                });
+
+                this.loadingSectionIds.update((state) => {
+                    const next = new Set(state);
+                    next.delete(sectionId);
+                    return next;
+                });
+            },
+            error: () => {
+                this.loadingSectionIds.update((state) => {
+                    const next = new Set(state);
+                    next.delete(sectionId);
+                    return next;
+                });
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Failed to load lessons',
+                    life: 3000
+                });
+            }
+        });
+    }
+
+    private mapLessonResponse(lesson: any): Lesson | null {
+        if (!lesson) {
+            return null;
+        }
+
+        return {
+            id: lesson.lessonId ?? lesson.id,
+            title: lesson.title,
+            type: lesson.type,
+            duration: lesson.duration,
+            order: lesson.order,
+            sectionId: lesson.sectionId
+        };
     }
 
     getThumbnailUrl(path?: string): string {
@@ -179,5 +419,36 @@ export class SectionListDetail implements OnInit {
                 });
             }
         }
+    }
+
+    deleteSelectedSections() {
+        this.confirmationService.confirm({
+            message: 'Are you sure you want to delete the selected sections?',
+            header: 'Confirm',
+            icon: 'pi pi-exclamation-triangle',
+            accept: () => {
+                const ids = this.selectedSections!.map((s) => s.id as number);
+                this.sectionService.bulkSoftDeleteSections(this.courseId, ids).subscribe({
+                    next: () => {
+                        this.sections.set(this.sections().filter((val) => !this.selectedSections?.includes(val)));
+                        this.selectedSections = null;
+                        this.messageService.add({
+                            severity: 'success',
+                            summary: 'Successful',
+                            detail: 'Sections Deleted',
+                            life: 3000
+                        });
+                    },
+                    error: () => {
+                        this.messageService.add({
+                            severity: 'error',
+                            summary: 'Error',
+                            detail: 'Failed to delete sections',
+                            life: 3000
+                        });
+                    }
+                });
+            }
+        });
     }
 }

@@ -61,9 +61,7 @@ export class AuthService {
   }
 
   checkAuth(): Observable<AuthResponse> {
-    const token = this.getCookie('accessToken');
-    const headers = token ? { Authorization: `Bearer ${token}` } : undefined;
-    return this.http.get<AuthResponse>(`${this.baseUrl}/check-auth`, { headers, withCredentials: true }).pipe(
+    return this.http.get<AuthResponse>(`${this.baseUrl}/check-auth`, { withCredentials: true }).pipe(
       tap((response) => {
         const userData = response.data?.user || response.data;
         if (userData && (userData.userId || userData.role)) {
@@ -74,13 +72,10 @@ export class AuthService {
   }
 
   logout(): Observable<AuthResponse> | null {
-    const token = this.getCookie('accessToken');
-    const headers = token ? { Authorization: `Bearer ${token}` } : undefined;
-    
     this.clearAuthUser();
     this.removeCookie('accessToken');
     
-    return this.http.post<AuthResponse>(`${this.baseUrl}/logout`, {}, { headers, withCredentials: true });
+    return this.http.post<AuthResponse>(`${this.baseUrl}/logout`, {}, { withCredentials: true });
   }
 
   getAuthUser(): AuthUser | null {

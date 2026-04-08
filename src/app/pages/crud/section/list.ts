@@ -16,22 +16,12 @@ import { Router } from '@angular/router';
 @Component({
     selector: 'app-section-list',
     standalone: true,
-    imports: [
-        CommonModule,
-        TableModule,
-        ButtonModule,
-        RippleModule,
-        ToastModule,
-        ToolbarModule,
-        TagModule,
-        AvatarModule,
-        InputIconModule,
-        IconFieldModule
-    ],
+    imports: [CommonModule, TableModule, ButtonModule, RippleModule, ToastModule, ToolbarModule, TagModule, AvatarModule, InputIconModule, IconFieldModule],
     templateUrl: './list.html',
     providers: [MessageService]
 })
 export class SectionList implements OnInit {
+    // Khai báo biến cục bộ
     private router = inject(Router);
     private courseService = inject(CourseService);
     private messageService = inject(MessageService);
