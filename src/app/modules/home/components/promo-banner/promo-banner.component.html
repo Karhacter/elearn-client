@@ -1,0 +1,33 @@
+<section class="relative z-10 -mb-14 px-4 md:-mb-20 md:px-6">
+  <div class="container">
+    <div
+      class="relative overflow-hidden rounded-2xl border border-blue-200 shadow-lg md:rounded-3xl dark:border-cyan-500/20 dark:shadow-[0_0_40px_rgba(34,211,238,0.15)]"
+    >
+      <div
+        class="absolute inset-0 bg-blue-700 dark:bg-gradient-to-r dark:from-cyan-600/90 dark:via-indigo-700/85 dark:to-fuchsia-700/90"
+      ></div>
+      <div
+        class="absolute -right-20 -bottom-24 h-64 w-64 rounded-full bg-white/15 blur-3xl md:h-80 md:w-80 dark:bg-orange-400/25"
+      ></div>
+      <div
+        class="absolute -left-16 top-0 h-48 w-48 rounded-full bg-white/10 blur-3xl dark:bg-pink-500/20"
+      ></div>
+      <div
+        class="relative flex flex-col items-stretch gap-6 p-8 md:flex-row md:items-center md:justify-between md:p-10 lg:p-12"
+      >
+        <p
+          class="max-w-2xl text-2xl font-bold leading-tight text-white drop-shadow-sm md:text-3xl lg:text-4xl"
+        >
+          {{ headline }}
+        </p>
+        <button
+          type="button"
+          (click)="onCta()"
+          class="shrink-0 rounded-xl bg-white px-8 py-3.5 text-sm font-bold text-blue-800 shadow-md transition hover:bg-blue-50 md:px-10 dark:text-slate-900 dark:hover:bg-cyan-50 dark:hover:shadow-[0_0_24px_rgba(255,255,255,0.45)]"
+        >
+          {{ ctaLabel }}
+        </button>
+      </div>
+    </div>
+  </div>
+</section>

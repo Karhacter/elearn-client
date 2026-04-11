@@ -44,6 +44,14 @@
   h2 {
     @apply text-black sm:text-5xl text-4xl
   }
+
+  .dark h1 {
+    @apply text-white;
+  }
+
+  .dark h2 {
+    @apply text-white;
+  }
 }
 
 @layer utilities {
@@ -59,4 +67,9 @@ html {
 
 body {
   font-family: 'Inter', sans-serif;
+  @apply bg-slate-50 text-slate-900 antialiased;
+}
+
+.dark body {
+  @apply bg-[#05050c] text-slate-200;
 }

@@ -1,0 +1,74 @@
+<section
+  class="border-b border-slate-100 bg-white py-16 md:py-20 dark:border-white/5 dark:bg-[#06060f]"
+>
+  <div class="container max-w-4xl">
+    <header class="mb-10 text-center">
+      <h2
+        class="!text-3xl font-bold tracking-tight text-slate-900 sm:!text-4xl md:!text-5xl dark:!text-white"
+      >
+        {{ titleParts.before }}
+        <span class="relative inline-block">
+          <span
+            class="text-blue-600 dark:bg-gradient-to-r dark:from-amber-400 dark:via-orange-400 dark:to-fuchsia-500 dark:bg-clip-text dark:text-transparent"
+            >{{ highlightWord }}</span
+          >
+          <span
+            class="absolute -bottom-1 left-0 h-1 w-full rounded-full bg-blue-600 dark:bg-gradient-to-r dark:from-orange-500 dark:to-fuchsia-500 dark:opacity-90 dark:shadow-[0_0_14px_rgba(251,146,60,0.55)]"
+          ></span>
+        </span>
+        {{ titleParts.after }}
+      </h2>
+      <p class="mt-4 text-sm text-slate-600 md:text-base dark:text-slate-500">
+        {{ countMessage ?? 'We found ' + events.length + ' events available for you.' }}
+      </p>
+    </header>
+
+    <ul class="flex flex-col gap-4">
+      @for (ev of events; track ev.id) {
+        <li>
+          <button
+            type="button"
+            (click)="onViewMore(ev)"
+            class="group relative flex w-full flex-col gap-2 overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 p-5 text-left shadow-sm transition duration-300 hover:border-blue-200 hover:shadow-md sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:p-6 dark:border-white/10 dark:bg-white/[0.03] dark:shadow-[0_0_0_1px_rgba(255,255,255,0.02)] dark:backdrop-blur-md dark:hover:border-cyan-400/35 dark:hover:shadow-[0_0_28px_rgba(34,211,238,0.18)]"
+            [ngClass]="
+              ev.highlighted
+                ? 'ring-1 ring-blue-200 shadow-md dark:ring-cyan-500/30 dark:shadow-[0_0_24px_rgba(34,211,238,0.12)]'
+                : ''
+            "
+          >
+            @if (ev.highlighted) {
+              <span
+                class="pointer-events-none absolute left-0 top-0 bottom-0 w-1 bg-blue-600 dark:bg-gradient-to-b dark:from-cyan-400 dark:via-fuchsia-500 dark:to-pink-500 dark:shadow-[0_0_16px_rgba(34,211,238,0.9)]"
+                aria-hidden="true"
+              ></span>
+            }
+            <div class="min-w-0 flex-1" [class.pl-2]="ev.highlighted">
+              <p class="text-xs text-slate-500 md:text-sm">
+                <span class="font-medium text-blue-700 dark:text-cyan-400/90">{{
+                  ev.dateLabel
+                }}</span>
+                <span class="mx-2 text-slate-300 dark:text-slate-600">|</span>
+                <span>{{ ev.timeRange }}</span>
+                <span class="mx-2 text-slate-300 dark:text-slate-600">|</span>
+                <span class="text-slate-700 dark:text-fuchsia-300/80">{{ ev.location }}</span>
+              </p>
+              <h3
+                class="mt-2 text-base font-semibold text-slate-900 transition group-hover:text-blue-700 md:text-lg dark:text-white dark:group-hover:text-cyan-200"
+              >
+                {{ ev.title }}
+              </h3>
+            </div>
+            <span
+              class="inline-flex shrink-0 items-center gap-1 text-sm font-semibold text-blue-600 transition group-hover:gap-2 group-hover:text-blue-800 dark:text-fuchsia-300 dark:group-hover:text-cyan-300"
+            >
+              View More
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+            </span>
+          </button>
+        </li>
+      }
+    </ul>
+  </div>
+</section>
