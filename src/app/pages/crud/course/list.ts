@@ -56,6 +56,7 @@ export class CourseList implements OnInit {
     loading: boolean = true;
 
     globalFilter: string = '';
+    private searchTimeout: any;
 
     cols!: Column[];
 
@@ -199,7 +200,47 @@ export class CourseList implements OnInit {
     }
 
     onGlobalFilter(table: Table, event: Event): void {
-        table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
+        const keyword = (event.target as HTMLInputElement).value;
+        this.globalFilter = keyword;
+
+        if (this.searchTimeout) {
+            clearTimeout(this.searchTimeout);
+        }
+
+        this.searchTimeout = setTimeout(() => {
+            this.executeSearch();
+        }, 500); // 500ms debounce
+    }
+
+    executeSearch(): void {
+        this.loading = true;
+
+        if (!this.globalFilter || this.globalFilter.trim() === '') {
+            this.loadCourses(this.dt);
+            return;
+        }
+
+        this.courseService.searchCourses(this.globalFilter).subscribe({
+            next: (response) => {
+                if (response && response.data) {
+                    this.courses.set(response.data);
+                    this.totalRecords = response.data.length;
+                    if (this.dt) {
+                        this.dt.first = 0;
+                    }
+                }
+                this.loading = false;
+            },
+            error: () => {
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Search failed',
+                    life: 3000
+                });
+                this.loading = false;
+            }
+        });
     }
 
     /** Returns the effective price after discount */

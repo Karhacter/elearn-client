@@ -62,6 +62,18 @@ export class CourseService {
         });
     }
 
+    searchCourses(keyword?: string, genreId?: number, instructorId?: number): Observable<ApiResponse<CourseResponse[]>> {
+        let params = new HttpParams();
+        if (keyword) params = params.set('keyword', keyword);
+        if (genreId) params = params.set('genreId', genreId.toString());
+        if (instructorId) params = params.set('instructorId', instructorId.toString());
+
+        return this.http.get<ApiResponse<CourseResponse[]>>(`${this.courseUrl}/search`, {
+            params,
+            withCredentials: true
+        });
+    }
+
     getCourseById(id: number): Observable<ApiResponse<CourseResponse>> {
         return this.http.get<ApiResponse<CourseResponse>>(`${this.courseUrl}/detail/${id}`, {
             withCredentials: true

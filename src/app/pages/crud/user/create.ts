@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
@@ -59,7 +59,7 @@ export class UserCreate implements OnInit {
     private locationData: Record<string, { code: string; name: string }[]> = {
         VN: [
             { code: 'HCM', name: 'Ho Chi Minh' },
-            { code: 'HN',  name: 'Hanoi' }
+            { code: 'HN', name: 'Hanoi' }
         ],
         US: [
             { code: 'NY', name: 'New York' },
@@ -78,19 +78,20 @@ export class UserCreate implements OnInit {
         private fb: FormBuilder,
         private messageService: MessageService,
         private router: Router,
-        private userService: UserService
+        private userService: UserService,
+        private location: Location
     ) {
         this.userForm = this.fb.group({
-            fullName:    ['', Validators.required],
-            email:       ['', [Validators.required, Validators.email]],
+            fullName: ['', Validators.required],
+            email: ['', [Validators.required, Validators.email]],
             phoneNumber: ['', Validators.required],
-            password:    ['', [Validators.required, passwordSecurityValidator()]],
-            role:        ['Student', Validators.required],
-            gender:      ['', Validators.required],
-            birthday:    [null, [Validators.required, pastDateValidator]],
-            country:     [null, Validators.required],
-            city:        [{ value: null, disabled: true }, Validators.required],
-            street:      ['']
+            password: ['', [Validators.required, passwordSecurityValidator()]],
+            role: ['Student', Validators.required],
+            gender: ['', Validators.required],
+            birthday: [null, [Validators.required, pastDateValidator]],
+            country: [null, Validators.required],
+            city: [{ value: null, disabled: true }, Validators.required],
+            street: ['']
         });
     }
 
@@ -137,18 +138,18 @@ export class UserCreate implements OnInit {
 
             const raw = this.userForm.getRawValue();
             const userData = {
-                fullName:    raw.fullName,
-                email:       raw.email,
+                fullName: raw.fullName,
+                email: raw.email,
                 phoneNumber: raw.phoneNumber,
-                password:    raw.password,
-                role:        raw.role,
-                gender:      raw.gender,
-                birthday:    raw.birthday ? (raw.birthday as Date).toISOString().split('T')[0] : null,
+                password: raw.password,
+                role: raw.role,
+                gender: raw.gender,
+                birthday: raw.birthday ? (raw.birthday as Date).toISOString().split('T')[0] : null,
                 countryCode: raw.country?.code ?? null,
                 countryName: raw.country?.name ?? null,
-                cityCode:    raw.city?.code ?? null,
-                cityName:    raw.city?.name ?? null,
-                street:      raw.street,
+                cityCode: raw.city?.code ?? null,
+                cityName: raw.city?.name ?? null,
+                street: raw.street,
                 isEmailVerified: 1
             };
 
@@ -183,7 +184,7 @@ export class UserCreate implements OnInit {
             summary: 'Success',
             detail: `User ${name} has been created successfully`
         });
-        setTimeout(() => this.router.navigate(['/pages/crud/user/list']), 1000);
+        setTimeout(() => this.location.back(), 1000);
     }
 
     private handleError(message: string) {
@@ -196,6 +197,6 @@ export class UserCreate implements OnInit {
     }
 
     onCancel() {
-        this.router.navigate(['/pages/crud/user/list']);
+        this.location.back();
     }
 }

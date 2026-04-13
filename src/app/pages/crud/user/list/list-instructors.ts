@@ -29,13 +29,13 @@ interface ExportColumn {
 }
 
 @Component({
-    selector: 'app-user-trash',
+    selector: 'app-user-list-instructors',
     standalone: true,
     imports: [CommonModule, TableModule, FormsModule, ButtonModule, RippleModule, ToastModule, ToolbarModule, InputTextModule, DialogModule, TagModule, SelectModule, InputIconModule, IconFieldModule, ConfirmDialogModule],
-    templateUrl: './trash.html',
+    templateUrl: './list-instructors.html',
     providers: [MessageService, ConfirmationService]
 })
-export class UserTrash implements OnInit {
+export class UserListInstructors implements OnInit {
     userDialog: boolean = false;
 
     users = signal<User[]>([]);
@@ -62,16 +62,18 @@ export class UserTrash implements OnInit {
     constructor(
         private userService: UserService,
         private messageService: MessageService,
-        private confirmationService: ConfirmationService
+        private confirmationService: ConfirmationService,
+        private router: Router
     ) {}
+
+    totalRecords: number = 0;
+    loading: boolean = true;
 
     exportCSV() {
         this.dt.exportCSV();
     }
 
     ngOnInit() {
-        this.loadUsers();
-
         this.cols = [
             { field: 'userId', header: 'ID' },
             { field: 'fullName', header: 'Full Name' },
@@ -83,100 +85,68 @@ export class UserTrash implements OnInit {
         this.exportColumns = this.cols.map((col) => ({ title: col.header, dataKey: col.field }));
     }
 
-    loadUsers() {
-        this.userService.getDeletedUsers().subscribe({
+    loadUsers(event?: any) {
+        this.loading = true;
+        const page = event && event.first !== undefined && event.rows !== undefined ? Math.floor(event.first / event.rows) + 1 : 1;
+        const pageSize = event && event.rows ? event.rows : 10;
+
+        this.userService.getInstructors(page, pageSize).subscribe({
             next: (response) => {
                 if (response && response.data) {
-                    this.users.set(response.data);
+                    this.users.set(response.data.items || []);
+                    this.totalRecords = response.data.totalCount || 0;
                 }
+                this.loading = false;
             },
             error: (err) => {
                 this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Could not fetch users', life: 3000 });
+                this.loading = false;
             }
         });
     }
 
-    onGlobalFilter(table: Table, event: Event) {
-        table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
-    }
-
-    restoreUser(user: User) {
-        this.confirmationService.confirm({
-            message: 'Are you sure you want to restore ' + user.fullName + '?',
-            header: 'Confirm',
-            icon: 'pi pi-exclamation-triangle',
-            accept: () => {
-                this.userService.softDeleteUser(user.userId!).subscribe({
-                    next: () => {
-                        this.users.set(this.users().filter((val) => val.userId !== user.userId));
-                        this.user = {};
-                        this.messageService.add({ severity: 'success', summary: 'Successful', detail: 'User Restored', life: 3000 });
-                    },
-                    error: (err) => {
-                        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Could not delete user', life: 3000 });
-                    }
-                });
+    openNew(): void {
+        this.router.navigate(['/pages/crud/user/create'], {
+            state: {
+                from: 'user-list',
+                timestamp: Date.now()
             }
         });
     }
 
-    restoreSelectedUsers() {
-        this.confirmationService.confirm({
-            message: 'Are you sure you want to restore the selected users?',
-            header: 'Confirm Bulk Restore',
-            icon: 'pi pi-exclamation-triangle',
-            accept: () => {
-                const toRestore = [...(this.selectedUsers ?? [])];
-                if (toRestore.length === 0) return;
+    viewUser(user: User) {
+        this.router.navigate(['/pages/crud/user/view', user.userId], {
+            state: {
+                from: 'user-list',
+                timestamp: Date.now()
+            }
+        });
+    }
 
-                let completed = 0;
-                let hasError = false;
-
-                toRestore.forEach((user) => {
-                    this.userService.softDeleteUser(user.userId!).subscribe({
-                        next: () => {
-                            completed++;
-                            if (completed === toRestore.length) {
-                                this.users.set(this.users().filter((val) => !toRestore.includes(val)));
-                                this.selectedUsers = null;
-                                const msg = hasError
-                                    ? 'Some users could not be restored'
-                                    : 'Selected users restored successfully';
-                                this.messageService.add({ severity: hasError ? 'warn' : 'success', summary: hasError ? 'Partial' : 'Successful', detail: msg, life: 3000 });
-                            }
-                        },
-                        error: () => {
-                            hasError = true;
-                            completed++;
-                            if (completed === toRestore.length) {
-                                this.loadUsers();
-                                this.selectedUsers = null;
-                                this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Could not restore selected users', life: 3000 });
-                            }
-                        }
-                    });
-                });
+    editUser(user: User) {
+        this.router.navigate(['/pages/crud/user/edit', user.userId], {
+            state: {
+                from: 'user-list',
+                timestamp: Date.now()
             }
         });
     }
 
     deleteSelectedUsers() {
         this.confirmationService.confirm({
-            message: 'Are you sure you want to permanently delete the selected users?',
+            message: 'Are you sure you want to move the selected users to trash?',
             header: 'Confirm Bulk Delete',
             icon: 'pi pi-exclamation-triangle',
             accept: () => {
-                const ids = (this.selectedUsers ?? [])
-                    .map((u) => u.userId!)
-                    .filter((id) => id != null);
+                const ids = (this.selectedUsers ?? []).map((u) => u.userId!).filter((id) => id != null);
 
                 if (ids.length === 0) return;
 
                 this.userService.bulkSoftDelete(ids).subscribe({
                     next: () => {
-                        this.users.set(this.users().filter((val) => !this.selectedUsers?.includes(val)));
                         this.selectedUsers = null;
-                        this.messageService.add({ severity: 'success', summary: 'Successful', detail: 'Selected users deleted', life: 3000 });
+                        this.messageService.add({ severity: 'success', summary: 'Successful', detail: 'Selected users moved to trash', life: 3000 });
+                        this.loadUsers();
                     },
                     error: () => {
                         this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Could not delete selected users', life: 3000 });
@@ -191,17 +161,17 @@ export class UserTrash implements OnInit {
         this.submitted = false;
     }
 
-    deleteUser(user: User) {
+    softDeleteUser(user: User) {
         this.confirmationService.confirm({
-            message: 'Are you sure you want to delete forever  ' + user.fullName + '?',
+            message: 'Are you sure you want to delete ' + user.fullName + '?',
             header: 'Confirm',
             icon: 'pi pi-exclamation-triangle',
             accept: () => {
-                this.userService.deleteUser(user.userId!).subscribe({
+                this.userService.softDeleteUser(user.userId!).subscribe({
                     next: () => {
                         this.users.set(this.users().filter((val) => val.userId !== user.userId));
                         this.user = {};
-                        this.messageService.add({ severity: 'success', summary: 'Successful', detail: 'User Removed', life: 3000 });
+                        this.messageService.add({ severity: 'success', summary: 'Successful', detail: 'User Deleted ( Moved To Trash )', life: 3000 });
                     },
                     error: (err) => {
                         this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Could not delete user', life: 3000 });
@@ -229,6 +199,9 @@ export class UserTrash implements OnInit {
     getProfilePictureUrl(path?: string) {
         if (!path) {
             return 'https://primefaces.org/cdn/primeng/images/demo/avatar/amyelsner.png';
+        }
+        if (path.startsWith('http')) {
+            return path;
         }
         return `http://localhost:5263/${path}`;
     }

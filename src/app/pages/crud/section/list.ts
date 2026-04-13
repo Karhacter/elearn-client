@@ -30,16 +30,26 @@ export class SectionList implements OnInit {
 
     allCourses = signal<CourseResponse[]>([]);
     loading = signal<boolean>(false);
+    totalRecords: number = 0;
 
     ngOnInit() {
-        this.loadAllCourses();
+        // onLazyLoad will automatically trigger the initial data fetch
     }
 
-    loadAllCourses() {
+    loadCourses(event?: any) {
         this.loading.set(true);
-        this.courseService.getCourses(1, 100).subscribe({
+
+        const first = event?.first ?? 0;
+        const rows = event?.rows ?? 10;
+        const page = Math.floor(first / rows) + 1;
+        const pageSize = rows;
+
+        this.courseService.getCourses(page, pageSize).subscribe({
             next: (response) => {
-                this.allCourses.set(response.data.items || []);
+                if (response && response.data) {
+                    this.allCourses.set(response.data.items || []);
+                    this.totalRecords = response.data.totalCount || 0;
+                }
                 this.loading.set(false);
             },
             error: () => {

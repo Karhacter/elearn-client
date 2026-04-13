@@ -25,6 +25,7 @@ import { TooltipModule } from 'primeng/tooltip';
 import { Lesson, LessonService } from '@/app/core/services/lesson.service';
 import { SectionLessonsBoxComponent } from './component/section-lessons-box';
 import { CreateLesson, CreateLessonPayload } from './component/create-lesson';
+import { TrashLessonsComponent } from './component/trash-lessons';
 
 interface Column {
     field: string;
@@ -62,7 +63,8 @@ interface ExportColumn {
         RouterLink,
         TooltipModule,
         SectionLessonsBoxComponent,
-        CreateLesson
+        CreateLesson,
+        TrashLessonsComponent
     ],
     templateUrl: './section-list.html',
     providers: [MessageService, ConfirmationService]
@@ -92,6 +94,9 @@ export class SectionListDetail implements OnInit {
     section: Section = {};
     selectedSections!: Section[] | null;
     submitted: boolean = false;
+
+    lessonTrashDialog = false;
+    sectionIdForTrash?: number;
 
     @ViewChild('dt') dt!: Table;
     exportColumns!: ExportColumn[];
@@ -430,7 +435,7 @@ export class SectionListDetail implements OnInit {
                 const ids = this.selectedSections!.map((s) => s.id as number);
                 this.sectionService.bulkSoftDeleteSections(this.courseId, ids).subscribe({
                     next: () => {
-                        this.sections.set(this.sections().filter((val) => !this.selectedSections?.includes(val)));
+                        this.sections.update((items) => items.filter((item) => !this.selectedSections?.some(s => s.id === item.id)));
                         this.selectedSections = null;
                         this.messageService.add({
                             severity: 'success',
@@ -450,5 +455,14 @@ export class SectionListDetail implements OnInit {
                 });
             }
         });
+    }
+
+    onLessonRefreshed(sectionId: number): void {
+        this.fetchLessons(sectionId, true);
+    }
+
+    onViewLessonTrash(sectionId: number): void {
+        this.sectionIdForTrash = sectionId;
+        this.lessonTrashDialog = true;
     }
 }

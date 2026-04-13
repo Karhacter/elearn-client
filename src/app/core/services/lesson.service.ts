@@ -25,6 +25,12 @@ export class LessonService {
         });
     }
 
+    getDeleted(sectionId: number, page: number = 1, pageSize: number = 20): Observable<any> {
+        return this.http.get<any>(`${this.courseUrl}/sections/${sectionId}/lessons/deleted?page=${page}&pageSize=${pageSize}`, {
+            withCredentials: true
+        });
+    }
+
     createLesson(sectionId: number, lesson: Lesson): Observable<any> {
         return this.http.post<any>(`${this.courseUrl}/sections/${sectionId}/lessons`, lesson, {
             withCredentials: true
@@ -41,5 +47,15 @@ export class LessonService {
         return this.http.delete<any>(`${this.courseUrl}/lessons/${lessonId}`, {
             withCredentials: true
         });
+    }
+
+    bulksoftdelete(sectionId: number, ids: number[], restore: boolean = false): Observable<any> {
+        return this.http.post<any>(
+            `${this.courseUrl}/sections/${sectionId}/lessons/bulk-soft-delete`,
+            { ids, restore },
+            {
+                withCredentials: true
+            }
+        );
     }
 }

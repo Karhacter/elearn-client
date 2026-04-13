@@ -26,6 +26,18 @@ export class UserService {
         });
     }
 
+    getInstructors(page: number = 1, pageSize: number = 10): Observable<any> {
+        return this.http.get<any>(`${this.userUrl}/instructors?page=${page}&pageSize=${pageSize}`, {
+            withCredentials: true
+        });
+    }
+
+    getDeletedInstructors(page: number = 1, pageSize: number = 10): Observable<any> {
+        return this.http.get<any>(`${this.userUrl}/instructors/deleted?page=${page}&pageSize=${pageSize}`, {
+            withCredentials: true
+        });
+    }
+
     getDeletedUsers(): Observable<{ data: User[] }> {
         return this.http.get<{ data: User[] }>(`${this.userUrl}/deleted`, {
             withCredentials: true

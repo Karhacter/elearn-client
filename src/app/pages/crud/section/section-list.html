@@ -108,7 +108,7 @@
                     <td class="text-surface-600 dark:text-surface-400">{{ section.description || 'No description provided' }}</td>
                     <td class="text-right">
                         <div class="flex items-center justify-end gap-2">
-                            <button type="button" pButton pRipple class="p-button-outlined p-button-danger p-button-sm" pTooltip="delete lesson" tooltipPosition="top" (click)="$event.stopPropagation(); openCreateLesson(section)">
+                            <button type="button" pButton pRipple class="p-button-outlined p-button-danger p-button-sm" pTooltip="Move section to trash" tooltipPosition="top" (click)="$event.stopPropagation(); softDeleteSection(section)">
                                 <i class="pi pi-trash"></i>
                             </button>
                             <button type="button" pButton pRipple class="p-button-outlined p-button-success p-button-sm" pTooltip="Create new lesson" tooltipPosition="top" (click)="$event.stopPropagation(); openCreateLesson(section)">
@@ -141,12 +141,21 @@
                 <i class="pi pi-times"></i>
             </button>
         </div>
-        <app-section-lessons-box [lessons]="getLessonsBySection(expandedSectionId)" [isLoading]="isSectionLoading(expandedSectionId)" />
-    </div>
+        <app-section-lessons-box 
+            [sectionId]="expandedSectionId"
+            [lessons]="getLessonsBySection(expandedSectionId)" 
+            [isLoading]="isSectionLoading(expandedSectionId)"
+            (refreshed)="onLessonRefreshed($event)"
+            (viewTrash)="onViewLessonTrash($event)" />
+    </div>  
 </div>
 
 <p-dialog [(visible)]="lessonDialog" [style]="{ width: '36rem' }" header="Create Lesson" [modal]="true" appendTo="body" [draggable]="false" [resizable]="false" (onHide)="closeCreateLessonDialog()">
     <app-create-lesson *ngIf="lessonDialog" [submitting]="creatingLesson" (createLesson)="createLesson($event)" (cancel)="closeCreateLessonDialog()" />
+</p-dialog>
+
+<p-dialog [(visible)]="lessonTrashDialog" [style]="{ width: '60rem' }" header="Lesson Trash Management" [modal]="true" appendTo="body" [draggable]="false" [resizable]="false">
+    <app-trash-lessons *ngIf="lessonTrashDialog" [sectionId]="sectionIdForTrash" (onRestore)="onLessonRefreshed(sectionIdForTrash!)" />
 </p-dialog>
 
 <p-dialog [(visible)]="sectionDialog" [style]="{ width: '500px' }" header="Section Configuration" [modal]="true" position="center" appendTo="body" [draggable]="false" [resizable]="false" class="p-fluid">
@@ -178,3 +187,4 @@
 </p-dialog>
 
 <p-confirmdialog [style]="{ width: '450px' }" appendTo="body" />
+<p-toast />

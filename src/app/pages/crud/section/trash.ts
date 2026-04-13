@@ -24,22 +24,7 @@ interface Column {
 @Component({
     selector: 'app-section-trash',
     standalone: true,
-    imports: [
-        CommonModule,
-        TableModule,
-        FormsModule,
-        ButtonModule,
-        RippleModule,
-        ToastModule,
-        ToolbarModule,
-        InputTextModule,
-        TagModule,
-        InputIconModule,
-        IconFieldModule,
-        ConfirmDialogModule,
-        RouterLink,
-        TooltipModule
-    ],
+    imports: [CommonModule, TableModule, FormsModule, ButtonModule, RippleModule, ToastModule, ToolbarModule, InputTextModule, TagModule, InputIconModule, IconFieldModule, ConfirmDialogModule, RouterLink, TooltipModule],
     templateUrl: './trash.html',
     providers: [MessageService, ConfirmationService]
 })
@@ -75,11 +60,11 @@ export class SectionTrash implements OnInit {
         this.sectionService.getDeleted(this.courseId).subscribe({
             next: (response: any) => {
                 const items = response.data ? response.data : response;
-                const mappedItems = Array.isArray(items) 
+                const mappedItems = Array.isArray(items)
                     ? items.map((s: any) => ({
-                        ...s,
-                        id: s.sectionId || s.id
-                    })) 
+                          ...s,
+                          id: s.sectionId || s.id
+                      }))
                     : [];
                 this.sections.set(mappedItems);
                 this.loading.set(false);
@@ -127,7 +112,7 @@ export class SectionTrash implements OnInit {
             header: 'Confirm',
             icon: 'pi pi-exclamation-triangle',
             accept: () => {
-                const ids = this.selectedSections!.map((s) => s.id as number);               
+                const ids = this.selectedSections!.map((s) => s.id as number);
                 if (!ids.length) return;
 
                 this.sectionService.bulkSoftDeleteSections(this.courseId, ids, true).subscribe({
@@ -153,9 +138,6 @@ export class SectionTrash implements OnInit {
             }
         });
     }
-
-
-    
 
     exportCSV() {
         this.dt.exportCSV();

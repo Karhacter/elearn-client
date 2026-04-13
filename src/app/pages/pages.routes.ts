@@ -1,9 +1,9 @@
 import { Routes } from '@angular/router';
 import { Empty } from './empty/empty';
 import { roleGuard } from '../core/guards/role.guard';
-import { UserList } from './crud/user/list';
+import { UserList } from './crud/user/list/list';
 import { UserCreate } from './crud/user/create';
-import { UserTrash } from './crud/user/trash';
+import { UserTrash } from './crud/user/trash/trash';
 import { UserView } from './crud/user/view';
 import { CategoryList } from './crud/category/list';
 import { CourseList } from './crud/course/list';
@@ -14,7 +14,8 @@ import { CourseEdit } from './crud/course/edit';
 import { SectionList } from './crud/section/list';
 import { SectionListDetail } from './crud/section/section-list';
 import { SectionTrash } from './crud/section/trash';
-import { CreateLesson } from './crud/section/component/create-lesson';
+import { UserListInstructors } from './crud/user/list/list-instructors';
+import { UserTrashInstructors } from './crud/user/trash/trash-instructors';
 
 export default [
     {
@@ -25,9 +26,11 @@ export default [
         data: { roles: ['ADMIN'] },
         children: [
             { path: '', redirectTo: '/notfound', pathMatch: 'full' },
-            { path: 'user/list', component: UserList },
+            { path: 'user/list/student', component: UserList },
+            { path: 'user/list/instructors', component: UserListInstructors },
             { path: 'user/create', component: UserCreate },
-            { path: 'user/trash', component: UserTrash },
+            { path: 'user/trash/student', component: UserTrash },
+            { path: 'user/trash/instructors', component: UserTrashInstructors },
             // { path: 'user/edit/:id', component: UserEdit },
             { path: 'user/view/:id', component: UserView },
 
@@ -55,7 +58,9 @@ export default [
         children: [
             { path: 'course/:courseId/section/list', component: SectionListDetail },
             { path: 'course/section/list', component: SectionList },
-            { path: 'course/:courseId/section/trash', component: SectionTrash },
+            { path: 'course/:courseId/section/trash', component: SectionTrash }
+
+            //
         ]
     },
 

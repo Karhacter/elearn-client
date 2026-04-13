@@ -1,10 +1,14 @@
-import { Component, computed, inject, input, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, input, OnInit, signal, ViewChild } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MenuItem } from 'primeng/api';
 import { RouterModule, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { StyleClassModule } from 'primeng/styleclass';
 import { MenuModule } from 'primeng/menu';
+import { PopoverModule, Popover } from 'primeng/popover';
+import { BadgeModule } from 'primeng/badge';
+import { NotificationService } from '../../core/services/notification.service';
+import { NotificationResponse, NotificationSummaryResponse } from '../../core/models/notification.model';
 import { AuthService } from '../../core/services/auth.service';
 import { AppConfigurator } from './app.configurator';
 import { LayoutService } from '@/app/layout/service/layout.service';
@@ -12,7 +16,7 @@ import { LayoutService } from '@/app/layout/service/layout.service';
 @Component({
     selector: 'app-topbar',
     standalone: true,
-    imports: [RouterModule, CommonModule, StyleClassModule, AppConfigurator, MenuModule],
+    imports: [RouterModule, CommonModule, StyleClassModule, MenuModule, PopoverModule, BadgeModule],
     template: ` <div class="layout-topbar">
         <div class="layout-topbar-logo-container">
             <button class="layout-menu-button layout-topbar-action" (click)="layoutService.onMenuToggle()">
@@ -53,10 +57,38 @@ import { LayoutService } from '@/app/layout/service/layout.service';
 
             <div class="layout-topbar-menu hidden lg:block">
                 <div class="layout-topbar-menu-content">
-                    <button type="button" class="layout-topbar-action">
-                        <i class="pi pi-bell"></i>
+                    <button type="button" class="layout-topbar-action" (click)="toggleNotifications($event)">
+                        <i class="pi pi-bell p-overlay-badge">
+                            <p-badge *ngIf="notificationSummary?.unreadCount && notificationSummary!.unreadCount > 0" [value]="notificationSummary!.unreadCount.toString()" severity="danger" badgeSize="small"></p-badge>
+                        </i>
                         <span>Notifications</span>
                     </button>
+                    <!-- Notification Popover -->
+                    <p-popover #notificationsPopover id="notifications_popover" [style]="{ width: '350px' }">
+                        <div class="flex items-center justify-between p-3 border-b border-surface-200 dark:border-surface-700">
+                            <span class="text-xl font-semibold">Notifications</span>
+                            <button *ngIf="notifications.length > 0" class="p-link text-sm text-primary hover:underline font-medium cursor-pointer" (click)="markAllAsRead(notificationsPopover)">
+                                Mark all as read
+                            </button>
+                        </div>
+                        <ul class="list-none p-0 m-0 max-h-[400px] overflow-auto">
+                            <li *ngIf="notifications.length === 0" class="p-4 text-center text-surface-500">
+                                No notifications found
+                            </li>
+                            <li *ngFor="let notif of notifications" class="p-3 border-b border-surface-200 dark:border-surface-700 hover:bg-surface-100 dark:hover:bg-surface-800 cursor-pointer transition-colors duration-200"
+                                [class.bg-blue-50]="!notif.isRead" [class.dark:bg-blue-900]="!notif.isRead" (click)="onNotificationClick(notif, notificationsPopover)">
+                                <div class="flex items-start gap-3">
+                                    <i class="pi pi-bell text-2xl text-primary mt-1"></i>
+                                    <div class="flex-1">
+                                        <div class="font-medium text-color mb-1" [class.font-bold]="!notif.isRead">{{ notif.title }}</div>
+                                        <div class="text-sm text-surface-600 dark:text-surface-400 mb-2 line-clamp-2">{{ notif.message }}</div>
+                                        <div class="text-xs text-surface-500">{{ notif.createdAt | date:'short' }}</div>
+                                    </div>
+                                    <div *ngIf="!notif.isRead" class="w-2 h-2 rounded-full bg-primary mt-2"></div>
+                                </div>
+                            </li>
+                        </ul>
+                    </p-popover>
                     <button type="button" class="layout-topbar-action">
                         <i class="pi pi-calendar"></i>
                         <span>Calendar</span>
@@ -79,6 +111,11 @@ export class AppTopbar implements OnInit {
     items!: MenuItem[];
     profileMenuItems!: MenuItem[];
 
+    notificationService = inject(NotificationService);
+    notifications: NotificationResponse[] = [];
+    notificationSummary: NotificationSummaryResponse | null = null;
+    @ViewChild('notificationsPopover') notificationsPopover!: Popover;
+
     layoutService = inject(LayoutService);
     authService = inject(AuthService);
     router = inject(Router);
@@ -86,6 +123,7 @@ export class AppTopbar implements OnInit {
     authUser = toSignal(this.authService.authUser$);
 
     ngOnInit() {
+        this.fetchNotificationSummary();
         if (typeof window !== 'undefined') {
             const savedTheme = localStorage.getItem('theme');
             if (savedTheme) {
@@ -124,7 +162,6 @@ export class AppTopbar implements OnInit {
         return `http://localhost:5263/${path}`;
 
         // return 'https://primefaces.org/cdn/primeng/images/demo/avatar/amyelsner.png';
-        
     }
 
     private updateProfileMenu(name: string, userId?: string) {
@@ -159,6 +196,53 @@ export class AppTopbar implements OnInit {
                 localStorage.setItem('theme', isDark ? 'dark' : 'light');
             }
             return { ...state, darkTheme: isDark };
+        });
+    }
+
+    fetchNotificationSummary() {
+        this.notificationService.getSummary().subscribe({
+            next: (res) => {
+                if (res && res.data) {
+                    this.notificationSummary = res.data;
+                }
+            },
+            error: (err) => console.error('Failed to fetch notification summary', err)
+        });
+    }
+
+    toggleNotifications(event: Event) {
+        this.notificationsPopover.toggle(event);
+        this.notificationService.getNotifications().subscribe({
+            next: (res) => {
+                if (res && res.data) {
+                    this.notifications = res.data;
+                }
+            },
+            error: (err) => console.error('Failed to fetch notifications', err)
+        });
+    }
+
+    onNotificationClick(notif: NotificationResponse, popover: Popover) {
+        if (!notif.isRead) {
+            this.notificationService.markAsRead(notif.id).subscribe(() => {
+                notif.isRead = true;
+                if (this.notificationSummary && this.notificationSummary.unreadCount > 0) {
+                    this.notificationSummary.unreadCount--;
+                }
+            });
+        }
+        if (notif.actionUrl) {
+            this.router.navigateByUrl(notif.actionUrl);
+            popover.hide();
+        }
+    }
+
+    markAllAsRead(popover: Popover) {
+        this.notificationService.markAllAsRead().subscribe(() => {
+            this.notifications.forEach(n => n.isRead = true);
+            if (this.notificationSummary) {
+                this.notificationSummary.unreadCount = 0;
+            }
         });
     }
 }
