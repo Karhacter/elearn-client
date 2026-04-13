@@ -1,7 +1,11 @@
+// Updated UI models for Home module
 export interface NavItem {
   label: string;
   route?: string;
   href?: string;
+  /** Optional query string for `routerLink` (e.g. course list layout presets). */
+  queryParams?: Record<string, string>;
+  children?: NavItem[];
 }
 
 export interface UserPreview {

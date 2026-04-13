@@ -22,7 +22,7 @@
       </div>
     </div>
   </div>
-} @else if (course) {
+} @else if (course && layout === 'card') {
   <article
     role="button"
     tabindex="0"
@@ -119,6 +119,112 @@
             stroke-width="2"
             viewBox="0 0 24 24"
           >
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+          </svg>
+        </span>
+      </div>
+    </div>
+  </article>
+} @else if (course && layout === 'row') {
+  <article
+    role="button"
+    tabindex="0"
+    (click)="onCardClick()"
+    (keydown.enter)="onCardClick()"
+    class="group flex w-full cursor-pointer flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white text-left shadow-sm transition duration-300 hover:border-blue-200 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 sm:flex-row sm:items-stretch dark:border-white/10 dark:bg-white/[0.04] dark:shadow-[0_0_0_1px_rgba(255,255,255,0.02)] dark:backdrop-blur-md dark:hover:border-cyan-400/35 dark:hover:shadow-[0_0_28px_rgba(34,211,238,0.18)] dark:focus-visible:outline-cyan-400"
+  >
+    <div class="relative aspect-[16/10] shrink-0 overflow-hidden sm:aspect-auto sm:h-auto sm:w-72 md:w-80">
+      <img
+        [src]="course.thumbnailUrl"
+        [alt]="course.title"
+        class="h-full w-full object-cover transition duration-500 group-hover:scale-[1.02]"
+        loading="lazy"
+      />
+      <span
+        class="absolute left-3 top-3 rounded-full border px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide backdrop-blur-sm"
+        [ngClass]="badgeClass[course.categoryTone]"
+      >
+        {{ course.categoryLabel }}
+      </span>
+    </div>
+
+    <div class="flex min-w-0 flex-1 flex-col p-4 md:p-6">
+      <div class="flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+        @if (levelLabel) {
+          <span
+            class="rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 font-semibold capitalize text-slate-700 dark:border-white/10 dark:bg-white/5 dark:text-slate-200"
+            >{{ levelLabel }}</span
+          >
+        }
+        <span class="inline-flex items-center gap-1">
+          <svg
+            class="h-3.5 w-3.5 text-blue-500 dark:text-cyan-500/80"
+            fill="currentColor"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path
+              d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z"
+            />
+          </svg>
+          {{ course.lessonCount }} lessons
+        </span>
+        <span class="inline-flex items-center gap-1 text-amber-600 dark:text-amber-300/90">
+          <svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"
+            />
+          </svg>
+          {{ course.rating }}
+          <span class="text-slate-400 dark:text-slate-500">({{ course.reviewCount }})</span>
+        </span>
+      </div>
+
+      <h3
+        class="mt-2 text-lg font-semibold leading-snug text-slate-900 transition group-hover:text-blue-700 md:text-xl dark:text-white dark:group-hover:text-cyan-200"
+      >
+        {{ course.title }}
+      </h3>
+
+      @if (listDescription) {
+        <p class="mt-2 line-clamp-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+          {{ listDescription }}
+        </p>
+      }
+
+      <div class="mt-4 flex flex-wrap items-center gap-3">
+        <img
+          [src]="course.instructorAvatarUrl"
+          [alt]="course.instructorName"
+          class="h-9 w-9 rounded-full border border-slate-200 object-cover ring-1 ring-slate-100 dark:border-white/10 dark:ring-fuchsia-500/30"
+        />
+        <span class="text-sm font-medium text-slate-700 dark:text-slate-300">{{ course.instructorName }}</span>
+      </div>
+
+      <div
+        class="mt-auto flex flex-wrap items-end justify-between gap-3 border-t border-slate-100 pt-4 dark:border-white/5"
+      >
+        @if (showPrice) {
+          <div class="flex flex-col">
+            <span
+              class="text-xl font-bold text-blue-700 dark:text-cyan-300 dark:drop-shadow-[0_0_8px_rgba(34,211,238,0.35)]"
+            >
+              <span>$</span>{{ course.price | number : '1.0-0' }}
+            </span>
+            @if (course.originalPrice != null && course.originalPrice > course.price) {
+              <span class="text-xs text-slate-400 line-through dark:text-slate-500"
+                ><span>$</span>{{ course.originalPrice | number : '1.0-0' }}</span
+              >
+            }
+          </div>
+        } @else {
+          <span></span>
+        }
+        <span
+          class="inline-flex items-center gap-1 text-sm font-medium text-blue-600 transition group-hover:gap-2 dark:text-fuchsia-300"
+        >
+          View course
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
           </svg>
         </span>

@@ -1,0 +1,59 @@
+<div class="min-h-screen bg-slate-50 text-slate-800 antialiased dark:bg-[#05050c] dark:text-slate-200">
+  <app-header
+    [navItems]="navItems"
+    [user]="user"
+    [categories]="(categories$ | async) || []"
+    (searchSubmit)="onSearch($event)"
+    (ctaClick)="onHeaderCta()"
+  />
+
+  <main>
+    <app-hero 
+      [featuredCourse]="(featuredCourses$ | async)?.[0] || null" 
+      (featuredClick)="onCourse($event)" 
+    />
+
+    <app-category-list
+      [categories]="(categories$ | async) || []"
+      (categorySelect)="onCategory($event)"
+    />
+
+    <!-- Featured Courses Section -->
+    <ng-container *ngIf="featuredCourses$ | async as featuredCourses; else loadingCourses">
+      <app-course-section
+        *ngIf="featuredCourses.length > 0"
+        sectionTitle="Find the right course for you"
+        highlightWord="course"
+        subtitle="Hand-picked paths with ratings, lesson counts, and instructors who show up."
+        [courses]="featuredCourses"
+        (courseClick)="onCourse($event)"
+      />
+    </ng-container>
+    <ng-template #loadingCourses>
+      <div class="p-20 text-center text-slate-400">Loading featured courses...</div>
+    </ng-template>
+
+    <!-- Grouped Courses by Category -->
+    <ng-container *ngIf="categoryGroups$ | async as groups; else loadingGroups">
+      <ng-container *ngFor="let group of groups">
+        <app-course-section
+          [sectionTitle]="group.category.label"
+          [subtitle]="group.category.description"
+          [courses]="group.courses"
+          [viewAllLabel]="'See all ' + group.category.label"
+          (courseClick)="onCourse($event)"
+        />
+      </ng-container>
+    </ng-container>
+    <ng-template #loadingGroups>
+      <div class="p-20 text-center text-slate-400">Loading categories...</div>
+    </ng-template>
+
+    <app-events-section [events]="events" (viewMore)="onEvent($event)" />
+
+    <app-pricing-section [plans]="pricingPlans" (planSelect)="onPlan($event)" />
+  </main>
+
+  <app-promo-banner (ctaClick)="onPromoCta()" />
+  <app-footer (newsletterSubmit)="onNewsletter($event)" />
+</div>

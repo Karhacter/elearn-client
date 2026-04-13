@@ -1,0 +1,70 @@
+<div
+  class="space-y-8 rounded-2xl border border-slate-200/80 bg-white/80 p-5 shadow-sm backdrop-blur-md dark:border-white/10 dark:bg-[#070714]/80 lg:sticky lg:top-28 lg:p-6"
+>
+  <div>
+    <h3 class="text-xs font-bold uppercase tracking-[0.2em] text-slate-900 dark:text-white/90">Recent posts</h3>
+    <ul class="mt-4 space-y-3">
+      @for (p of recentPosts; track p.id) {
+        <li>
+          <a
+            [routerLink]="['/blog', p.id]"
+            class="group flex gap-3 rounded-xl p-2 transition hover:bg-slate-50 dark:hover:bg-white/5"
+          >
+            <img
+              [src]="p.thumbnail"
+              [alt]="p.title"
+              class="h-14 w-20 shrink-0 rounded-lg object-cover ring-1 ring-slate-200 dark:ring-white/10"
+            />
+            <div class="min-w-0">
+              <p
+                class="line-clamp-2 text-sm font-semibold leading-snug text-slate-900 group-hover:text-blue-700 dark:text-white dark:group-hover:text-cyan-300"
+              >
+                {{ p.title }}
+              </p>
+              <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">{{ p.date | date : 'mediumDate' }}</p>
+            </div>
+          </a>
+        </li>
+      }
+    </ul>
+  </div>
+
+  <div>
+    <h3 class="text-xs font-bold uppercase tracking-[0.2em] text-slate-900 dark:text-white/90">Categories</h3>
+    <div class="mt-4 flex flex-col gap-2">
+      <a
+        routerLink="/blog"
+        class="inline-flex w-full items-center justify-center rounded-xl border px-3 py-2.5 text-center text-sm font-semibold transition"
+        [ngClass]="filterChipClass(!activeCategory && !activeTag)"
+      >
+        All posts
+      </a>
+      @for (c of categories; track c.slug) {
+        <a
+          routerLink="/blog"
+          [queryParams]="{ category: c.slug }"
+          class="inline-flex w-full items-center justify-center rounded-xl border px-3 py-2.5 text-center text-sm font-semibold transition"
+          [ngClass]="filterChipClass(chipActive(c.slug, 'category'))"
+        >
+          {{ c.label }}
+        </a>
+      }
+    </div>
+  </div>
+
+  <div>
+    <h3 class="text-xs font-bold uppercase tracking-[0.2em] text-slate-900 dark:text-white/90">Tags</h3>
+    <div class="mt-4 flex flex-wrap gap-2">
+      @for (t of tags; track t.slug) {
+        <a
+          routerLink="/blog"
+          [queryParams]="{ tag: t.slug }"
+          class="rounded-lg border px-2.5 py-1 text-xs font-semibold transition"
+          [ngClass]="filterChipClass(chipActive(t.slug, 'tag'))"
+        >
+          #{{ t.label }}
+        </a>
+      }
+    </div>
+  </div>
+</div>

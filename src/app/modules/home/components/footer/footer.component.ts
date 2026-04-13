@@ -18,13 +18,13 @@ export class FooterComponent {
     {
       title: 'Company',
       links: [
-        { label: 'About', href: '#' },
+        { label: 'About', href: '/about' },
         { label: 'Courses', href: '#' },
         { label: 'Events', href: '#' },
         { label: 'Instructor', href: '#' },
         { label: 'Career', href: '#' },
         { label: 'Become a Teacher', href: '#' },
-        { label: 'Contact', href: '#' },
+        { label: 'Contact', href: '/contact' },
       ],
     },
     {
@@ -60,6 +60,10 @@ export class FooterComponent {
     if (v) {
       this.newsletterSubmit.emit(v);
     }
+  }
+
+  isInternalRoute(href: string): boolean {
+    return href.startsWith('/') && !href.startsWith('//');
   }
 
   socialClass(icon: SocialLinkItem['icon']): string {

@@ -1,0 +1,64 @@
+<div
+  class="relative min-h-screen bg-slate-50 text-slate-800 antialiased dark:bg-[#05050c] dark:text-slate-200"
+>
+  <div
+    class="pointer-events-none fixed inset-0 bg-[linear-gradient(rgba(37,99,235,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(37,99,235,0.04)_1px,transparent_1px)] bg-[size:48px_48px] opacity-50 dark:bg-[linear-gradient(rgba(34,211,238,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(34,211,238,0.04)_1px,transparent_1px)] dark:opacity-70"
+  ></div>
+
+  <app-header
+    [navItems]="navItems"
+    [user]="user"
+    [categories]="categories"
+    (searchSubmit)="onSearch($event)"
+    (ctaClick)="onTryFree()"
+  />
+
+  <main class="relative">
+    <section class="py-8 md:py-12 lg:py-14">
+      <div class="container max-w-5xl">
+        <button
+          type="button"
+          (click)="backToCatalog()"
+          class="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-blue-700 transition hover:text-blue-800 dark:text-cyan-300 dark:hover:text-cyan-200"
+        >
+          <svg
+            class="h-4 w-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            aria-hidden="true"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M15 19l-7-7 7-7"
+            />
+          </svg>
+          Back to courses
+        </button>
+
+        @if (course$ | async; as course) {
+          <app-course-detail
+            [course]="course"
+            [relatedCourses]="(relatedCourses$ | async) ?? []"
+            (enroll)="onEnroll($event)"
+            (buyNow)="onBuyNow($event)"
+            (relatedSelect)="onRelatedSelect($event)"
+          />
+        } @else {
+          <div class="py-16 text-center">
+            <div class="flex flex-col items-center gap-3">
+              <div
+                class="h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-blue-600 dark:border-white/10 dark:border-t-cyan-400"
+              ></div>
+              <p class="text-sm text-slate-500 dark:text-slate-400">Loading course details...</p>
+            </div>
+          </div>
+        }
+      </div>
+    </section>
+  </main>
+
+  <app-footer (newsletterSubmit)="onNewsletter($event)" />
+</div>

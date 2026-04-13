@@ -1,0 +1,79 @@
+<div
+  class="relative min-h-screen bg-slate-50 text-slate-800 antialiased dark:bg-[#05050c] dark:text-slate-200"
+>
+  <div
+    class="pointer-events-none fixed inset-0 bg-[linear-gradient(rgba(37,99,235,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(37,99,235,0.04)_1px,transparent_1px)] bg-[size:48px_48px] opacity-50 dark:bg-[linear-gradient(rgba(34,211,238,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(34,211,238,0.04)_1px,transparent_1px)] dark:opacity-70"
+  ></div>
+
+  <app-header
+    [navItems]="navItems"
+    [user]="user"
+    [categories]="categories"
+    (searchSubmit)="onSearch($event)"
+    (ctaClick)="onTryFree()"
+  />
+
+  <main class="relative">
+    <section class="py-10 md:py-14 lg:py-16">
+      <div class="container px-4">
+        <div class="mx-auto max-w-3xl text-center lg:mx-0 lg:max-w-none lg:text-left">
+          <p
+            class="text-xs font-bold uppercase tracking-[0.25em] text-blue-600 dark:text-cyan-400 dark:drop-shadow-[0_0_12px_rgba(34,211,238,0.35)]"
+          >
+            Your cart
+          </p>
+          <h1 class="mt-2 text-3xl font-black tracking-tight text-slate-900 sm:text-4xl dark:text-white">
+            Courses ready to enroll
+          </h1>
+          <p class="mt-3 text-sm text-slate-600 dark:text-slate-400">
+            Adjust seats, remove lines, then seal the deal at checkout.
+          </p>
+        </div>
+
+        @if (cart.isEmpty()) {
+          <div
+            class="mx-auto mt-12 max-w-lg rounded-2xl border border-dashed border-slate-300/80 bg-white/60 px-8 py-16 text-center backdrop-blur-sm dark:border-cyan-500/25 dark:bg-[#070714]/60"
+          >
+            <div
+              class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 text-3xl dark:border-white/10 dark:bg-white/5"
+              aria-hidden="true"
+            >
+              🛒
+            </div>
+            <h2 class="mt-6 text-xl font-bold text-slate-900 dark:text-white">Your cart is empty</h2>
+            <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
+              Browse the catalog and add courses — neon paths await.
+            </p>
+            <a
+              routerLink="/courses/grid"
+              class="mt-8 inline-flex rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 dark:bg-gradient-to-r dark:from-cyan-500 dark:to-fuchsia-600 dark:shadow-[0_0_24px_rgba(34,211,238,0.35)] dark:hover:brightness-110"
+            >
+              Explore courses
+            </a>
+          </div>
+        } @else {
+          <div class="mt-10 grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(280px,360px)] lg:gap-10 lg:items-start">
+            <div>
+              <app-cart-line-list
+                [lines]="cart.lines()"
+                (quantityChange)="onQty($event)"
+                (remove)="onRemove($event)"
+              />
+            </div>
+            <div class="lg:sticky lg:top-28">
+              <app-cart-order-summary
+                [subtotal]="cart.subtotal()"
+                [discount]="cart.discount()"
+                [total]="cart.total()"
+                [disabledCheckout]="cart.isEmpty()"
+                (proceed)="checkout()"
+              />
+            </div>
+          </div>
+        }
+      </div>
+    </section>
+  </main>
+
+  <app-footer (newsletterSubmit)="onNewsletter($event)" />
+</div>

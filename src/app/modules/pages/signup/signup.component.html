@@ -1,0 +1,217 @@
+<div
+  class="relative min-h-screen bg-slate-50 text-slate-800 antialiased dark:bg-[#05050c] dark:text-slate-200"
+>
+  <div
+    class="pointer-events-none fixed inset-0 bg-[linear-gradient(rgba(37,99,235,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(37,99,235,0.04)_1px,transparent_1px)] bg-[size:48px_48px] opacity-50 dark:bg-[linear-gradient(rgba(34,211,238,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(34,211,238,0.04)_1px,transparent_1px)] dark:opacity-70"
+  ></div>
+
+  <app-header
+    [navItems]="navItems"
+    [user]="user"
+    [categories]="categories"
+    (searchSubmit)="onSearch($event)"
+    (ctaClick)="onTryFree()"
+  />
+
+  <main class="relative flex min-h-[calc(100vh-8rem)] items-center py-12 md:py-16">
+    <div class="container flex justify-center px-4">
+      <div
+        class="w-full max-w-md rounded-2xl border border-slate-200/80 bg-white/85 p-6 shadow-xl shadow-slate-200/50 backdrop-blur-md sm:p-8 dark:border-white/10 dark:bg-[#070714]/85 dark:shadow-[0_0_48px_rgba(217,70,239,0.1)]"
+      >
+        <div class="text-center">
+          <p
+            class="text-xs font-bold uppercase tracking-[0.25em] text-blue-600 dark:text-fuchsia-400 dark:drop-shadow-[0_0_12px_rgba(217,70,239,0.35)]"
+          >
+            Join NeoLearn
+          </p>
+          <h1 class="mt-3 text-2xl font-black tracking-tight text-slate-900 sm:text-3xl dark:text-white">
+            Sign up
+          </h1>
+          <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
+            Create your learner profile in under a minute.
+          </p>
+        </div>
+
+        <form [formGroup]="form" (ngSubmit)="submit()" class="mt-8 space-y-5" novalidate>
+          <div>
+            <label for="signup-name" class="mb-1.5 block text-sm font-semibold text-slate-800 dark:text-slate-200"
+              >Name</label
+            >
+            <input
+              id="signup-name"
+              type="text"
+              formControlName="name"
+              autocomplete="name"
+              [class]="inputBase + ' ' + (fieldInvalid('name') ? inputError : inputNormal)"
+              [attr.aria-invalid]="fieldInvalid('name')"
+            />
+            @if (fieldInvalid('name')) {
+              <p class="mt-1.5 text-xs font-medium text-red-600 dark:text-red-400">Name is required.</p>
+            }
+          </div>
+
+          <div>
+            <label for="signup-email" class="mb-1.5 block text-sm font-semibold text-slate-800 dark:text-slate-200"
+              >Email</label
+            >
+            <input
+              id="signup-email"
+              type="email"
+              formControlName="email"
+              autocomplete="email"
+              [class]="inputBase + ' ' + (fieldInvalid('email') ? inputError : inputNormal)"
+              [attr.aria-invalid]="fieldInvalid('email')"
+            />
+            @if (fieldInvalid('email')) {
+              <p class="mt-1.5 text-xs font-medium text-red-600 dark:text-red-400">
+                @if (form.controls.email.hasError('required')) {
+                  Email is required.
+                } @else if (form.controls.email.hasError('email')) {
+                  Enter a valid email address.
+                }
+              </p>
+            }
+          </div>
+
+          <div>
+            <label for="signup-password" class="mb-1.5 block text-sm font-semibold text-slate-800 dark:text-slate-200"
+              >Password</label
+            >
+            <div class="relative">
+              <input
+                id="signup-password"
+                [type]="showPassword ? 'text' : 'password'"
+                formControlName="password"
+                autocomplete="new-password"
+                [class]="
+                  inputBase +
+                  ' pr-11 ' +
+                  (fieldInvalid('password') || passwordMismatch() ? inputError : inputNormal)
+                "
+                [attr.aria-invalid]="fieldInvalid('password') || passwordMismatch()"
+              />
+              <button
+                type="button"
+                (click)="togglePassword()"
+                class="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-slate-200"
+                [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+              >
+                @if (showPassword) {
+                  <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
+                    />
+                  </svg>
+                } @else {
+                  <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                    />
+                  </svg>
+                }
+              </button>
+            </div>
+            @if (fieldInvalid('password')) {
+              <p class="mt-1.5 text-xs font-medium text-red-600 dark:text-red-400">
+                @if (form.controls.password.hasError('required')) {
+                  Password is required.
+                } @else if (form.controls.password.hasError('minlength')) {
+                  Use at least 8 characters.
+                }
+              </p>
+            }
+          </div>
+
+          <div>
+            <label
+              for="signup-confirm"
+              class="mb-1.5 block text-sm font-semibold text-slate-800 dark:text-slate-200"
+              >Confirm password</label
+            >
+            <div class="relative">
+              <input
+                id="signup-confirm"
+                [type]="showConfirmPassword ? 'text' : 'password'"
+                formControlName="confirmPassword"
+                autocomplete="new-password"
+                [class]="
+                  inputBase +
+                  ' pr-11 ' +
+                  (fieldInvalid('confirmPassword') || passwordMismatch() ? inputError : inputNormal)
+                "
+                [attr.aria-invalid]="fieldInvalid('confirmPassword') || passwordMismatch()"
+              />
+              <button
+                type="button"
+                (click)="toggleConfirmPassword()"
+                class="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-slate-200"
+                [attr.aria-label]="showConfirmPassword ? 'Hide password' : 'Show password'"
+              >
+                @if (showConfirmPassword) {
+                  <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
+                    />
+                  </svg>
+                } @else {
+                  <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                    />
+                  </svg>
+                }
+              </button>
+            </div>
+            @if (fieldInvalid('confirmPassword')) {
+              <p class="mt-1.5 text-xs font-medium text-red-600 dark:text-red-400">Please confirm your password.</p>
+            } @else if (passwordMismatch()) {
+              <p class="mt-1.5 text-xs font-medium text-red-600 dark:text-red-400">Passwords must match.</p>
+            }
+          </div>
+
+          <button
+            type="submit"
+            class="w-full rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 dark:bg-gradient-to-r dark:from-cyan-500 dark:to-fuchsia-600 dark:shadow-[0_0_24px_rgba(34,211,238,0.35)] dark:hover:brightness-110"
+          >
+            Create account
+          </button>
+        </form>
+
+        <p class="mt-6 text-center text-sm text-slate-600 dark:text-slate-400">
+          Already learning with us?
+          <a
+            routerLink="/sign-in"
+            class="font-semibold text-blue-700 hover:text-blue-800 dark:text-cyan-300 dark:hover:text-cyan-200"
+            >Sign in</a
+          >
+        </p>
+      </div>
+    </div>
+  </main>
+
+  <app-footer (newsletterSubmit)="onNewsletter($event)" />
+</div>

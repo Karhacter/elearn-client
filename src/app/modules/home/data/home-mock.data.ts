@@ -9,9 +9,37 @@ import {
 
 export const MOCK_NAV: NavItem[] = [
   { label: 'Home', route: '/' },
-  { label: 'Courses', route: '/' },
-  { label: 'Dashboard', route: '/' },
-  { label: 'Contact', route: '/' },
+  {
+    label: 'Courses',
+    route: '/courses/grid',
+    children: [
+      { label: 'Grid catalog', route: '/courses/grid' },
+      { label: 'List view', route: '/courses/list' },
+      { label: 'Browse & filters', route: '/courses/browse' },
+    ],
+  },
+  {
+    label: 'Blog',
+    route: '/blog',
+    // children: [
+    //   { label: 'Blog', route: '/blog' },
+    //   { label: 'Sample article', route: '/blog/b-neon-ssr' },
+    // ],
+  },
+  {
+    label: 'Pages',
+    route: '/',
+    children: [
+      { label: 'About', route: '/about' },
+      // { label: 'Contact', route: '/contact' },
+      { label: 'Cart', route: '/cart' },
+      // { label: 'Checkout', route: '/checkout' },
+      // { label: 'Sign in', route: '/sign-in' },
+      // { label: 'Sign up', route: '/sign-up' },
+      { label: 'F.A.Q', route: '/faq' },
+    ],
+  },
+  { label: 'Contact', route: '/contact' },
 ];
 
 export const MOCK_USER: UserPreview = {

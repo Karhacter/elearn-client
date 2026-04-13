@@ -17,12 +17,11 @@ const angularApp = new AngularNodeAppEngine();
  * Uncomment and define endpoints as necessary.
  *
  * Example:
- * ```ts
- * app.get('/api/{*splat}', (req, res) => {
- *   // Handle API request
- * });
  * ```
  */
+app.get('/admin', (req, res) => {
+  res.redirect('http://localhost:64934');
+});
 
 /**
  * Serve static files from /browser

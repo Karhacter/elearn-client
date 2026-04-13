@@ -1,9 +1,11 @@
+// Header component with categories and dropdowns
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { CartService } from '../../../../core/services/cart.service';
 import { ThemeService } from '../../../../core/services/theme.service';
-import { NavItem, UserPreview } from '../../models/home-ui.model';
+import { NavItem, UserPreview, CategoryItem } from '../../models/home-ui.model';
 
 @Component({
   selector: 'app-header',
@@ -13,18 +15,12 @@ import { NavItem, UserPreview } from '../../models/home-ui.model';
 })
 export class HeaderComponent {
   protected readonly theme = inject(ThemeService);
-
-  @Input() logoLabel = 'NeoLearn';
-  @Input() navItems: NavItem[] = [
-    { label: 'Home', route: '/' },
-    { label: 'Courses', route: '/' },
-    { label: 'Dashboard', route: '/' },
-    { label: 'Contact', route: '/' },
-  ];
-  @Input() user: UserPreview | null = {
-    name: 'Aya K.',
-    avatarUrl: 'https://i.pravatar.cc/80?img=5',
-  };
+  protected readonly router = inject(Router);
+  protected readonly cart = inject(CartService);
+  @Input() logoLabel = 'Educal';
+  @Input() navItems: NavItem[] = [];
+  @Input() categories: CategoryItem[] = [];
+  @Input() user: UserPreview | null = null;
   @Input() searchPlaceholder = 'Search courses, skills, instructors…';
   @Input() ctaLabel = 'Try free';
 
@@ -39,7 +35,7 @@ export class HeaderComponent {
   }
 
   onCta(): void {
-    this.ctaClick.emit();
+    void this.router.navigate(['/sign-up']);
   }
 
   onAvatar(): void {

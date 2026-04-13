@@ -7,23 +7,91 @@
       class="group flex shrink-0 items-center gap-2 font-semibold tracking-tight text-slate-900 dark:text-white"
     >
       <span
-        class="flex h-9 w-9 items-center justify-center rounded-lg border border-blue-200 bg-blue-50 text-blue-700 shadow-sm transition group-hover:bg-blue-100 dark:border-cyan-400/40 dark:bg-gradient-to-br dark:from-cyan-500/20 dark:to-fuchsia-500/20 dark:text-cyan-300 dark:shadow-[0_0_20px_rgba(34,211,238,0.35)] dark:group-hover:shadow-[0_0_28px_rgba(217,70,239,0.45)]"
+        class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 p-0.5 shadow-lg shadow-blue-500/20 transition-all duration-300 group-hover:scale-110 group-hover:shadow-blue-500/40 dark:from-cyan-500 dark:to-fuchsia-600 dark:shadow-cyan-500/20"
       >
-        <span class="text-lg font-black">N</span>
+        <span
+          class="flex h-full w-full items-center justify-center rounded-[10px] bg-white dark:bg-slate-900"
+        >
+          <span
+            class="bg-gradient-to-br from-blue-600 to-indigo-700 bg-clip-text text-xl font-black text-transparent dark:from-cyan-400 dark:to-fuchsia-400"
+            >N</span
+          >
+        </span>
       </span>
-      <span class="text-lg">{{ logoLabel }}</span>
+      <span class="text-2xl font-black tracking-tighter text-slate-900 sm:block dark:text-white">{{ logoLabel }}</span>
     </a>
+
+    <!-- Category Dropdown -->
+    <div class="relative group/cat hidden xl:block">
+      <button
+        class="flex items-center gap-2 rounded-xl border border-slate-200/60 bg-slate-50/50 px-4 py-2 text-sm font-semibold text-slate-700 transition-all hover:border-slate-300 hover:bg-white dark:border-white/10 dark:bg-white/5 dark:text-slate-200 dark:hover:bg-white/10"
+      >
+        <svg class="h-5 w-5 text-blue-600 dark:text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+        </svg>
+        <span>Categories</span>
+        <svg class="h-4 w-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      <!-- Dropdown Menu -->
+      <div class="absolute left-0 top-full z-50 mt-2 w-72 origin-top-left scale-95 opacity-0 transition-all duration-200 invisible group-hover/cat:visible group-hover/cat:scale-100 group-hover/cat:opacity-100">
+        <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white/80 p-2 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/90">
+          @for (cat of categories; track cat.id) {
+            <a
+              href="#"
+              (click)="$event.preventDefault()"
+              class="group/item flex items-center gap-3 rounded-xl p-3 px-4 transition-all hover:bg-blue-50/50 dark:hover:bg-white/5"
+            >
+              <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-xl transition-transform group-hover/item:scale-110 dark:bg-white/5">
+                {{ cat.icon }}
+              </span>
+              <div>
+                <p class="text-sm font-bold text-slate-900 dark:text-white">{{ cat.label }}</p>
+                <p class="text-xs text-slate-500 dark:text-slate-400 line-clamp-1">{{ cat.description }}</p>
+              </div>
+            </a>
+          }
+        </div>
+      </div>
+    </div>
 
     <nav
       class="order-3 flex w-full flex-wrap justify-center gap-1 text-sm font-medium text-slate-600 lg:order-none lg:w-auto lg:justify-start dark:text-slate-300"
     >
       @for (item of navItems; track item.label) {
-        <a
-          [routerLink]="item.route || '/'"
-          class="rounded-lg px-3 py-2 transition hover:bg-slate-100 hover:text-blue-700 dark:hover:bg-white/5 dark:hover:text-cyan-300 dark:hover:shadow-[0_0_12px_rgba(34,211,238,0.2)]"
-        >
-          {{ item.label }}
-        </a>
+        <div class="relative group/nav">
+          <a
+            [routerLink]="item.route || '/'"
+            [queryParams]="item.queryParams || undefined"
+            class="flex items-center gap-1.5 rounded-lg px-3 py-2 transition hover:bg-slate-100 hover:text-blue-700 dark:hover:bg-white/5 dark:hover:text-cyan-300"
+          >
+            {{ item.label }}
+            @if (item.children && item.children.length) {
+              <svg class="h-3.5 w-3.5 opacity-50 transition-transform group-hover/nav:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            }
+          </a>
+
+          @if (item.children && item.children.length) {
+            <!-- Submenu -->
+            <div class="absolute left-0 top-full z-50 mt-1 w-48 origin-top-left scale-95 opacity-0 transition-all duration-200 invisible group-hover/nav:visible group-hover/nav:scale-100 group-hover/nav:opacity-100">
+              <div class="overflow-hidden rounded-xl border border-slate-200 bg-white/95 p-1.5 shadow-xl backdrop-blur-md dark:border-white/10 dark:bg-slate-900/95">
+                @for (sub of item.children; track sub.label) {
+                  <a
+                    [routerLink]="sub.route || '/'"
+                    [queryParams]="sub.queryParams || undefined"
+                    class="block rounded-lg px-3 py-2 text-sm transition hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-white/5 dark:hover:text-cyan-400"
+                  >
+                    {{ sub.label }}
+                  </a>
+                }
+              </div>
+            </div>
+          }
+        </div>
       }
     </nav>
 
@@ -37,26 +105,41 @@
           [(ngModel)]="searchQuery"
           name="q"
           [placeholder]="searchPlaceholder"
-          class="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-white/10 dark:bg-white/5 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-cyan-400/50 dark:focus:ring-cyan-400/50"
+          class="w-full rounded-xl border border-slate-200 bg-slate-50/50 py-2.5 pl-10 pr-3 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition-all focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 dark:border-white/10 dark:bg-white/5 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-cyan-400/50 dark:focus:ring-cyan-400/20"
         />
         <svg
-          class="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-blue-500 dark:text-cyan-400/80"
-          fill="currentColor"
+          class="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400 dark:text-cyan-400/60"
+          fill="none"
+          stroke="currentColor"
           viewBox="0 0 24 24"
-          aria-hidden="true"
         >
-          <path
-            d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"
-          />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
       </form>
+
+      <!-- Cart -->
+      <a
+        routerLink="/cart"
+        class="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:bg-slate-50 hover:ring-2 hover:ring-blue-500/20 dark:border-white/15 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-white/10 dark:hover:ring-cyan-400/25"
+        aria-label="Shopping cart"
+      >
+        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+        </svg>
+        @if (cart.itemCount() > 0) {
+          <span
+            class="absolute -right-1 -top-1 flex h-5 min-w-5 px-1 items-center justify-center rounded-full bg-blue-600 text-[10px] font-bold text-white shadow-lg ring-2 ring-white dark:bg-fuchsia-600 dark:ring-slate-900"
+          >
+            {{ cart.itemCount() > 99 ? '99+' : cart.itemCount() }}
+          </span>
+        }
+      </a>
 
       <button
         type="button"
         (click)="theme.toggle()"
-        class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:bg-slate-50 dark:border-white/15 dark:bg-white/5 dark:text-amber-200 dark:shadow-none dark:hover:bg-white/10"
+        class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:bg-slate-50 dark:border-white/15 dark:bg-white/5 dark:text-amber-200 dark:hover:bg-white/10"
         [attr.aria-label]="theme.dark() ? 'Switch to light mode' : 'Switch to dark mode'"
-        [attr.aria-pressed]="theme.dark()"
       >
         @if (theme.dark()) {
           <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
